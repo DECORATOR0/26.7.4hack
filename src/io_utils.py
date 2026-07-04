@@ -5,7 +5,7 @@ import json
 import re
 from datetime import timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 
 def ensure_dir(path: Path) -> Path:
@@ -72,22 +72,31 @@ def image_to_data_url(path: Path) -> str:
     return f"data:image/{suffix};base64,{data}"
 
 
-def extract_json_object(text: str) -> Any:
+def extract_json_object(text: str, required_keys: Iterable[str] | None = None) -> Any:
     cleaned = text.strip()
     if cleaned.startswith("```"):
         cleaned = re.sub(r"^```(?:json)?", "", cleaned, flags=re.IGNORECASE).strip()
         cleaned = re.sub(r"```$", "", cleaned).strip()
-    try:
-        return json.loads(cleaned)
-    except json.JSONDecodeError:
-        pass
+    required = tuple(required_keys or ())
+
+    for candidate in _json_text_candidates(cleaned):
+        for variant in _json_repair_variants(candidate):
+            try:
+                value = json.loads(variant)
+            except json.JSONDecodeError:
+                continue
+            if _has_required_keys(value, required):
+                return value
 
     fenced = re.findall(r"```(?:json)?\s*(.*?)```", cleaned, flags=re.IGNORECASE | re.DOTALL)
     for candidate in reversed(fenced):
-        try:
-            return json.loads(candidate.strip())
-        except json.JSONDecodeError:
-            continue
+        for variant in _json_repair_variants(candidate.strip()):
+            try:
+                value = json.loads(variant)
+            except json.JSONDecodeError:
+                continue
+            if _has_required_keys(value, required):
+                return value
 
     decoder = json.JSONDecoder()
     parsed_values = []
@@ -96,7 +105,8 @@ def extract_json_object(text: str) -> Any:
             continue
         try:
             value, _ = decoder.raw_decode(cleaned[idx:])
-            parsed_values.append(value)
+            if _has_required_keys(value, required):
+                parsed_values.append(value)
         except json.JSONDecodeError:
             continue
     if parsed_values:
@@ -109,8 +119,136 @@ def extract_json_object(text: str) -> Any:
         if start >= 0 and end > start:
             candidates.append(cleaned[start : end + 1])
     for candidate in candidates:
-        try:
-            return json.loads(candidate)
-        except json.JSONDecodeError:
-            continue
+        for variant in _json_repair_variants(candidate):
+            try:
+                value = json.loads(variant)
+            except json.JSONDecodeError:
+                continue
+            if _has_required_keys(value, required):
+                return value
+    if required:
+        raise ValueError(f"Model response does not contain valid JSON with required keys: {', '.join(required)}")
     raise ValueError("Model response does not contain valid JSON")
+
+
+def _has_required_keys(value: Any, required_keys: tuple[str, ...]) -> bool:
+    if not required_keys:
+        return True
+    return isinstance(value, dict) and all(key in value for key in required_keys)
+
+
+def _json_text_candidates(text: str) -> list[str]:
+    candidates = [text]
+    for open_char, close_char in [("{", "}"), ("[", "]")]:
+        start = text.find(open_char)
+        end = text.rfind(close_char)
+        if start >= 0:
+            if end > start:
+                candidates.append(text[start : end + 1])
+            else:
+                candidates.append(text[start:])
+    return list(dict.fromkeys(candidate.strip() for candidate in candidates if candidate.strip()))
+
+
+def _json_repair_variants(text: str) -> list[str]:
+    variants = [text]
+    repaired = _repair_json_text(text)
+    if repaired != text:
+        variants.append(repaired)
+    return variants
+
+
+def _repair_json_text(text: str) -> str:
+    repaired = text.strip().lstrip("\ufeff")
+    repaired = _normalize_json_structure_chars(repaired)
+    repaired = _escape_newlines_inside_strings(repaired)
+    repaired = re.sub(r",\s*([}\]])", r"\1", repaired)
+    repaired = _close_unfinished_json(repaired)
+    repaired = re.sub(r",\s*([}\]])", r"\1", repaired)
+    return repaired
+
+
+def _normalize_json_structure_chars(text: str) -> str:
+    output: list[str] = []
+    in_string = False
+    escape = False
+    outside_map = {
+        "：": ":",
+        "，": ",",
+        "｛": "{",
+        "｝": "}",
+        "［": "[",
+        "］": "]",
+        "＂": '"',
+        "“": '"',
+        "”": '"',
+    }
+    for char in text:
+        if in_string:
+            output.append(char)
+            if escape:
+                escape = False
+            elif char == "\\":
+                escape = True
+            elif char == '"':
+                in_string = False
+            continue
+        char = outside_map.get(char, char)
+        output.append(char)
+        if char == '"':
+            in_string = True
+            escape = False
+    return "".join(output)
+
+
+def _escape_newlines_inside_strings(text: str) -> str:
+    output: list[str] = []
+    in_string = False
+    escape = False
+    for char in text:
+        if in_string and char in "\r\n":
+            output.append("\\n")
+            continue
+        output.append(char)
+        if in_string:
+            if escape:
+                escape = False
+            elif char == "\\":
+                escape = True
+            elif char == '"':
+                in_string = False
+        elif char == '"':
+            in_string = True
+            escape = False
+    return "".join(output)
+
+
+def _close_unfinished_json(text: str) -> str:
+    output: list[str] = []
+    stack: list[str] = []
+    in_string = False
+    escape = False
+    for char in text:
+        output.append(char)
+        if in_string:
+            if escape:
+                escape = False
+            elif char == "\\":
+                escape = True
+            elif char == '"':
+                in_string = False
+            continue
+        if char == '"':
+            in_string = True
+            escape = False
+        elif char == "{":
+            stack.append("}")
+        elif char == "[":
+            stack.append("]")
+        elif char in "}]":
+            if stack and stack[-1] == char:
+                stack.pop()
+    if in_string:
+        output.append('"')
+    output.extend(reversed(stack))
+    return "".join(output)

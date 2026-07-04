@@ -258,7 +258,7 @@ class EventAgentRunner:
                 max_tokens=self.options.text_max_tokens,
                 thinking_mode=False,
             )
-            parsed, parse_error = _parse_response(response.content)
+            parsed, parse_error = _parse_response(response.content, required_keys=("events",))
             finish_reason = response.raw.get("choices", [{}])[0].get("finish_reason")
             validation_error = self._validate_text_agent_parsed(parsed)
             if parse_error is None and validation_error is None and finish_reason != "length":
@@ -576,14 +576,26 @@ V3 只允许输出这 10 类事项：
             {"role": "user", "content": content},
         ]
         started = time.time()
-        response = self.client.chat(
-            messages,
-            temperature=self.options.temperature,
-            max_tokens=2600,
-            thinking_mode=False,
-        )
-        parsed, parse_error = _parse_response(response.content)
-        finish_reason = response.raw.get("choices", [{}])[0].get("finish_reason")
+        response = None
+        parsed = None
+        parse_error = None
+        finish_reason = None
+        for attempt in range(3):
+            response = self.client.chat(
+                messages,
+                temperature=self.options.temperature,
+                max_tokens=2600,
+                thinking_mode=False,
+            )
+            parsed, parse_error = _parse_response(response.content, required_keys=("event_id", "verdict"))
+            finish_reason = response.raw.get("choices", [{}])[0].get("finish_reason")
+            validation_error = self._validate_image_review_parsed(parsed)
+            if parse_error is None and validation_error is None and finish_reason != "length":
+                break
+            parse_error = parse_error or validation_error
+            if attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+        assert response is not None
         result = {
             "review_id": item["review_id"],
             "event_id": event["event_id"],
@@ -609,6 +621,14 @@ V3 只允许输出这 10 类事项：
         }
         write_json(raw_path, result)
         return result
+
+    @staticmethod
+    def _validate_image_review_parsed(parsed: Any) -> str | None:
+        if not isinstance(parsed, dict):
+            return "image review response is not a JSON object"
+        if "event_id" not in parsed or "verdict" not in parsed:
+            return "image review response missing event_id or verdict"
+        return None
 
     def _build_image_review_prompt(
         self,
@@ -796,14 +816,26 @@ V3 只允许输出这 10 类事项：
         if final_max_tokens is None:
             final_max_tokens = 14000 if self.options.schema_version == "v3" else 9000
         started = time.time()
-        response = self.client.chat(
-            messages,
-            temperature=self.options.temperature,
-            max_tokens=final_max_tokens,
-            thinking_mode=False,
-        )
-        parsed, parse_error = _parse_response(response.content)
-        finish_reason = response.raw.get("choices", [{}])[0].get("finish_reason")
+        response = None
+        parsed = None
+        parse_error = None
+        finish_reason = None
+        for attempt in range(3):
+            response = self.client.chat(
+                messages,
+                temperature=self.options.temperature,
+                max_tokens=final_max_tokens,
+                thinking_mode=False,
+            )
+            parsed, parse_error = _parse_response(response.content, required_keys=("final_events",))
+            finish_reason = response.raw.get("choices", [{}])[0].get("finish_reason")
+            validation_error = self._validate_final_consolidation_parsed(parsed)
+            if parse_error is None and validation_error is None and finish_reason != "length":
+                break
+            parse_error = parse_error or validation_error
+            if attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+        assert response is not None
         result = {
             "ok": parse_error is None and finish_reason != "length",
             "elapsed_seconds": round(time.time() - started, 3),
@@ -820,6 +852,14 @@ V3 只允许输出这 10 类事项：
                 parsed = _sanitize_v3_final(parsed, self.options.final_max_events)
             return parsed
         return {"final_events": [], "parse_error": parse_error, "raw": response.content}
+
+    @staticmethod
+    def _validate_final_consolidation_parsed(parsed: Any) -> str | None:
+        if not isinstance(parsed, dict):
+            return "final consolidation response is not a JSON object"
+        if not isinstance(parsed.get("final_events"), list):
+            return "final consolidation response missing final_events array"
+        return None
 
     def _build_final_prompt(self, candidate_pack: list[dict[str, Any]], review_pack: list[dict[str, Any]]) -> str:
         if self.options.schema_version == "v3":
@@ -1072,9 +1112,9 @@ V3 只允许输出这 10 类事项：
         }
 
 
-def _parse_response(content: str) -> tuple[Any, str | None]:
+def _parse_response(content: str, required_keys: tuple[str, ...] = ()) -> tuple[Any, str | None]:
     try:
-        return extract_json_object(content), None
+        return extract_json_object(content, required_keys=required_keys), None
     except Exception as exc:
         return None, str(exc)
 
