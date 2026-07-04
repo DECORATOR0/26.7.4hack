@@ -760,3 +760,241 @@ Web demo 不改变最终 report 的两个部分结构。后续如果要做交互
 - 一级菜单：事项类型，例如进球、点球、射门机会、角球、任意球、判罚、越位、换人、庆祝、半场/全场。
 - 二级菜单：该类型下的事件序号或展示标签，例如 `6' 德国进球`、`45+5' 点球`。
 - 点击事件后展示对应视频切片、比赛时间、解说词和 evidence 摘要。
+
+## Version 4 Improvement Draft
+
+Version 4 的目标是在 V3 的固定事项集合之上增加“事实拦截层”。V4 不扩大事项类型，不重新追踪球员身份，而是把容易下沉到 final report 的错误提前拦住：射门/进球误判、定位球时间点漂移、人名/号码/位置污染、非法事件类型、report 编造细节、比分链矛盾、以及 JSON 结构被错误接收。
+
+### 1. 射门相关事项必须联合画面 narrative 和比分牌
+
+所有射门相关事项都不能只看“球像不像进了”或“回放里像不像被扑”。`goal`、`shot_chance`、点球射门、任意球直接射门、角球后射门都必须综合：
+
+- 画面 narrative：是否描述射门、入网、扑出、偏出、挡出、门框、庆祝、重新开球。
+- 比分牌/字幕：射门前后比分是否变化，是否出现进球信息条，是否有全场进球名单反向确认。
+- 时间关系：比分牌可能在进球后几十秒才出现，不能因为 `±8s` 内没看到比分牌就否定进球。
+- 回放关系：回放只作为证据，不能单独推出新进球；同一比分下反复出现入网、庆祝或进球字幕，默认挂到同一主进球。
+
+V4 给射门相关候选事项新增字段：
+
+```json
+{
+  "shot_outcome": "goal|saved|missed|blocked|woodwork|unknown",
+  "scoreboard_relation": "score_changed|score_unchanged|score_not_visible|score_conflicting",
+  "score_before": "0-0",
+  "score_after": "1-0",
+  "score_evidence_timestamp": "00:15:42",
+  "score_evidence_source": "scoreboard|subtitle|fulltime_scorer_list|narrative",
+  "requires_score_chain_check": true
+}
+```
+
+判定规则：
+
+- 如果 narrative 写“球入网/破门/庆祝”，且后续比分牌或进球字幕确认比分变化，可以判为 `goal`。
+- 如果看到射门但后续比分不变，优先判为 `shot_chance`，不能写“打破僵局”“扩大比分”。
+- 如果看到球入网但比分不变，优先判为同一进球的回放/庆祝证据，不能新增 `goal`。
+- 如果射门被扑、射偏、挡出、击中门框，只有在比分链确认没有变化时才能稳定写成 `shot_chance`；否则保留 `unknown/probable` 并交给拦截层。
+- `goal` 的证据里必须至少有一个比分相关证据或明确进球字幕；纯视觉入网但无比分证据时不能自动升级为 confirmed。
+
+### 2. 定位球只记录“获得判罚/准备执行”的时间点
+
+角球、任意球、点球这三类判罚类事项，V4 默认只记录获得判罚或准备执行的时间点，不把后续传中、射门、进球混进同一事项。
+
+| event_type | V4 记录点 | 不默认记录 |
+|---|---|---|
+| `corner` | 获得角球、角球区准备开球、字幕/裁判确认角球 | 角球开出后的每一次争顶、解围、混战 |
+| `free_kick` | 获得任意球、定点摆球、人墙准备、裁判示意 | 任意球开出后的普通传球、普通争抢 |
+| `penalty` | 获得点球判罚、裁判指向点球点、点球准备 | 点球射门结果本身 |
+
+如果定位球之后直接产生射门或进球，则创建独立的 `shot_chance` 或 `goal`，并用 `linked_event_id` 关联原定位球事项。例如：
+
+```json
+{
+  "event_id": "F0010",
+  "event_type": "penalty",
+  "title": "德国队获得点球判罚"
+}
+```
+
+```json
+{
+  "event_id": "F0011",
+  "event_type": "goal",
+  "title": "德国队点球破门",
+  "linked_event_id": "F0010"
+}
+```
+
+这样可以避免“获得任意球”“任意球开出”“任意球进球”被混成一个时间点，也可以避免 report 把定位球机会当成已经射门得分。
+
+### 3. 新增 V4 拦截层
+
+V4 在模型 review 和 report 之间增加 deterministic guardrail。它不负责写稿，不负责补脑，只负责拦截违规信号、降级不稳定结论、生成可审计的拦截报告。
+
+新增流程：
+
+```text
+narrative -> text event agent -> image/model review -> final consolidation
+-> V4 guardrail interceptor -> final_events_guarded_v4.json
+-> report generator
+```
+
+推荐输出文件：
+
+- `outputs_event_agent_v4/final_events_clean_v4.json`
+- `outputs_event_agent_v4/final_events_guarded_v4.json`
+- `outputs_event_agent_v4/guardrail_findings.json`
+- `outputs_event_agent_v4/guardrail_report.md`
+- `outputs_script_report_v4/final_report_v4.md`
+
+拦截层原则：
+
+- 不凭空新增事实。
+- 不把 uncertain 改成 confirmed。
+- 不直接写最终解说文稿。
+- 能确定违规则拦截或降级；不能确定则标记 `needs_more_review=true`。
+- 所有拦截必须记录原因、命中的规则、原字段、新字段。
+
+### 4. V4 必须拦截的违规信号
+
+#### 4.1 人名、号码、位置、身份污染
+
+V4 继续不追踪球员身份。最终事项和 report 中不允许出现：
+
+- 球员姓名，例如从字幕 OCR 或模型猜测来的姓名。
+- 球衣号码，例如 `10号`、`23号`、`#7`。
+- 场上位置/身份，例如前锋、后卫、中场、队长、主罚手等。
+- 未经任务要求的教练姓名、裁判姓名、个人身份介绍。
+
+如果为了表达射门被化解，需要避免把身份写死；优先写：
+
+- “射门被防守方扑出”
+- “射门被化解”
+- “防守方完成扑救”
+
+而不是在最终稿里继续保留具体人名或号码。
+
+#### 4.2 非 V4 事项集合的事件类型
+
+最终事项只允许 V3/V4 的 10 类：
+
+```text
+goal, penalty, shot_chance, corner, free_kick,
+foul_card_dispute, offside, substitution, celebration, half_full_time
+```
+
+下列类型必须被拦截或合并：
+
+- `replay`
+- `attack_highlight`
+- `dead_ball`
+- `crowd`
+- `bench`
+- `close_up`
+- `live_play`
+- `scoreboard`
+- `lineup`
+- `hydration_break`
+- 任何模型临时编造的新 event_type
+
+其中 `replay`、`scoreboard`、`close_up` 可以作为 evidence，但不能作为最终事项。
+
+#### 4.3 非动作表动作或过度细节
+
+report 不能凭空把事件写成动作表外的细节。尤其拦截：
+
+- 未在 evidence 中出现的“远射、头球、凌空、单刀、弧线球、鱼跃、倒钩、补射、助攻、传中”等具体动作。
+- 未在 evidence 中出现的“速度、旋转率、距离、角度、概率、xG、百分比”等技术指标。
+- 未经证据支持的“故意犯规、战术犯规、情绪失控、绝杀、世界波”等解释性标签。
+
+如果 evidence 只支持“射门”，最终稿只能写“射门”；如果 evidence 只支持“进球”，不能自动扩写成“远射破门”或“头球破门”。
+
+#### 4.4 比分链矛盾
+
+所有 `goal` 必须进入比分链检查：
+
+- goal 数量必须能解释最终比分。
+- `score_after` 不能跳跃、倒退或重复新增。
+- 同一比分下的入网/庆祝/字幕只能作为同一主进球的证据。
+- 如果 fulltime scoreboard/进球名单里没有支撑某个进球，该进球必须降级为 `shot_chance`、`celebration` 或 `needs_more_review`。
+- 如果比分链显示缺少进球，允许生成 `scoreboard_backfill` 候选，但必须标明来源，不允许 report 直接当作画面已确认。
+
+#### 4.5 射门结果和比分状态冲突
+
+拦截层需要专门扫 `goal` 和 `shot_chance`：
+
+- 标题写“打破僵局/扩大比分”，但 `scoreboard_relation != score_changed`，拦截。
+- 标题写“被扑出/射偏/射飞”，但后续比分牌确认比分变化，拦截并要求重审。
+- evidence 写“球入网”，但同一事项 event_type 是 `shot_chance`，标记冲突。
+- evidence 写“被扑出”，但 event_type 是 `goal`，标记冲突。
+
+#### 4.6 定位球时间点漂移
+
+`corner/free_kick/penalty` 必须检查 `set_piece_phase`：
+
+```json
+{
+  "set_piece_phase": "awarded|preparation|taken|result"
+}
+```
+
+V4 final 只保留 `awarded` 或 `preparation` 作为定位球事项主时间点。`taken/result` 如果产生射门或进球，应改为 linked `shot_chance/goal`，否则不单列。
+
+#### 4.7 视频时间和比赛时间混淆
+
+拦截层必须禁止：
+
+- 把 `01:42:08` 写成“第142分钟”。
+- 把 `00:14:12` 写成“第14分钟”，除非 scoreboard/match_time 也支持。
+- report 自行从视频时间推导比赛时间。
+
+report 只能使用事件里的 `match_time` 展示比赛分钟。
+
+#### 4.8 report 新增事实
+
+report 只能消费 `final_events_guarded_v4.json`。如果 report 中出现表格没有的内容，必须标记：
+
+- 新比分。
+- 新进球。
+- 新球员/号码/位置。
+- 新判罚原因。
+- 新动作细节。
+- 新技术指标。
+
+report 的激情表达可以增强语气，但不能增加事实。
+
+#### 4.9 JSON/schema 异常
+
+V4 继承 JSON repair 和 strict schema 验收：
+
+- text agent 顶层必须有 `events`。
+- review 顶层必须有 `event_id/verdict`。
+- final 顶层必须有 `final_events`。
+- 不能接受内部 JSON fragment 当成功结果。
+- `finish_reason=length` 必须失败重试。
+- repair 后仍不满足 schema 的结果必须进入失败队列，不进入后续事项池。
+
+### 5. 从 V2/V3 回忆出的额外拦截项
+
+根据 V2/V3 已经出现的问题，V4 还应该拦截：
+
+1. 第三方队名污染：哥伦比亚、委内瑞拉、美国、巴拉圭等非本场队名不能进入 final/report。
+2. replay 误升新进球：回放、庆祝、进球信息条复现不能自动变成新进球。
+3. 首球误杀：如果后续 scoreboard 明确确认 `1-0` 和进球信息，不能因为短窗口图片 review 看不见入网瞬间就 reject。
+4. 缺失进球链：最终比分是 `7-1` 时，进球链必须解释 8 个进球；少球要标红。
+5. 点球链断裂：点球判罚和点球进球要能 linked，不能只保留判罚或只保留结果。
+6. report 编造技术指标：速度、旋转、距离、概率、百分比全部需要 evidence 白名单。
+7. 不确定事项被写实：`probable/uncertain` 在 report 中不能写成已经确定发生。
+8. 换人细节污染：换人只写某队换人，不写上下场姓名、号码或位置。
+9. 低价值庆祝单列过多：庆祝默认挂到主进球，除非确实是独立高价值镜头。
+10. 证据和标题冲突：title、event_type、evidence、script_angle 互相矛盾时，必须拦截。
+
+### 6. V4 最小实现建议
+
+第一版 V4 不需要重写全链路，先做三个补丁即可：
+
+1. 在 text event/final schema 里增加 `shot_outcome`、`scoreboard_relation`、`score_before`、`score_after`、`set_piece_phase`。
+2. 在 final consolidation 后新增 `guardrail_interceptor.py`，输出 guarded final 和 guardrail report。
+3. 让 report 只读取 `final_events_guarded_v4.json`，并在生成后再跑一次 report fact scan。
+
+这三个补丁能先解决当前最明显的错误：射门和进球混淆、定位球时间点混乱、人名/非法动作下沉、report 自行编造事实。
