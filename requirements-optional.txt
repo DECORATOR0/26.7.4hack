@@ -1,0 +1,6 @@
+# Optional enhancement dependencies. The core pipeline can run without these.
+faster-whisper
+openai-whisper
+pytesseract
+langgraph
+

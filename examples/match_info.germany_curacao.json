@@ -1,0 +1,12 @@
+{
+  "competition": "2026 年美加墨世界杯 E 组第 1 轮",
+  "match_name": "德国 vs 库拉索",
+  "home_team": "德国",
+  "away_team": "库拉索",
+  "home_team_en": "Germany",
+  "away_team_en": "Curacao",
+  "expected_score": "7-1",
+  "task_focus": "根据整场比赛视频自动识别关键事件，生成有现场感的中文解说脚本、字幕和集锦讲解结构化输出。",
+  "style": "激情、专业、克制，不编造没有证据的球员姓名。"
+}
+
