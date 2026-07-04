@@ -763,18 +763,19 @@ Web demo 不改变最终 report 的两个部分结构。后续如果要做交互
 
 ## Version 4 Improvement Draft
 
-Version 4 的目标是在 V3 的固定事项集合之上增加“事实拦截层”。V4 不扩大事项类型，不重新追踪球员身份，第一版拦截范围先收窄到：人名/号码污染、非法 event type、无证据支撑的独立动作或细节、比分链不连续、以及 JSON/schema 异常。位置/身份标签、射门结果和比分状态冲突、定位球时间点漂移、视频时间与比赛时间混淆、report 全文事实扫描，暂时不作为 V4 第一版硬拦截项。
+Version 4 的目标是在 V3 的固定事项集合之上增加“事实拦截层”。V4 不扩大事项类型，不重新追踪球员身份，第一版拦截范围只保留：人名/号码/身份污染、非法 event type、以及 JSON/schema 异常。比分链、射门结果冲突、定位球时间点漂移、视频时间与比赛时间混淆、report 全文事实扫描，都不作为 V4 第一版 guardrail 任务。
 
-### 1. 射门相关事项必须联合画面 narrative 和比分牌
+### 1. 射门相关事项必须在 narrative 前先读 OCR/比分牌面板
 
-所有射门相关事项都不能只看“球像不像进了”或“回放里像不像被扑”。`goal`、`shot_chance`、点球射门、任意球直接射门、角球后射门都必须综合：
+射门姿态和射门结果不要交给拦截层兜底。V4 要在 frame narration / narrative 生成之前，先让模型明确注意画面里的 OCR 面板和比分牌，再写 narrative。`goal`、`shot_chance`、点球射门、任意球直接射门、角球后射门都必须先综合：
 
+- OCR/比分牌面板：射门前后比分、比赛分钟、进球信息条、球员进球字幕、全场进球名单。
 - 画面 narrative：是否描述射门、入网、扑出、偏出、挡出、门框、庆祝、重新开球。
 - 比分牌/字幕：射门前后比分是否变化，是否出现进球信息条，是否有全场进球名单反向确认。
 - 时间关系：比分牌可能在进球后几十秒才出现，不能因为 `±8s` 内没看到比分牌就否定进球。
 - 回放关系：回放只作为证据，不能单独推出新进球；同一比分下反复出现入网、庆祝或进球字幕，默认挂到同一主进球。
 
-V4 给射门相关候选事项新增字段：
+V4 给 narrative/event candidate 保留这些辅助字段。它们服务于前置判断，不是 guardrail 第一版的硬拦截字段：
 
 ```json
 {
@@ -784,7 +785,7 @@ V4 给射门相关候选事项新增字段：
   "score_after": "1-0",
   "score_evidence_timestamp": "00:15:42",
   "score_evidence_source": "scoreboard|subtitle|fulltime_scorer_list|narrative",
-  "requires_score_chain_check": true
+  "requires_score_panel_check": true
 }
 ```
 
@@ -793,7 +794,7 @@ V4 给射门相关候选事项新增字段：
 - 如果 narrative 写“球入网/破门/庆祝”，且后续比分牌或进球字幕确认比分变化，可以判为 `goal`。
 - 如果看到射门但后续比分不变，优先判为 `shot_chance`，不能写“打破僵局”“扩大比分”。
 - 如果看到球入网但比分不变，优先判为同一进球的回放/庆祝证据，不能新增 `goal`。
-- 如果射门被扑、射偏、挡出、击中门框，只有在比分链确认没有变化时才能稳定写成 `shot_chance`；否则保留 `unknown/probable` 并交给拦截层。
+- 如果射门被扑、射偏、挡出、击中门框，只有在 OCR/比分牌面板或 narrative 明确支持比分未变化时，才能稳定写成 `shot_chance`；否则保留 `unknown/probable` 并在事项生成/review 阶段重审，不交给 guardrail 处理比分链。
 - `goal` 的证据里必须至少有一个比分相关证据或明确进球字幕；纯视觉入网但无比分证据时不能自动升级为 confirmed。
 
 ### 2. 定位球只记录“获得判罚/准备执行”的时间点
@@ -829,7 +830,7 @@ V4 给射门相关候选事项新增字段：
 
 ### 3. 新增 V4 拦截层
 
-V4 在模型 review 和 report 之间增加 deterministic guardrail。它不负责写稿，不负责补脑，只负责拦截违规信号、降级不稳定结论、生成可审计的拦截报告。
+V4 在模型 review 和 report 之间增加 guardrail 层。完整 `final_events` 当前不超过 10K tokens，可以整包丢给一个 guardrail agent 做全局检查。它不负责写稿，不负责补脑，不处理比分链，只负责拦截人名/号码/身份污染、非法 event type、JSON/schema 异常，并生成可审计的拦截报告。
 
 新增流程：
 
@@ -854,18 +855,18 @@ narrative -> text event agent -> image/model review -> final consolidation
 - 不直接写最终解说文稿。
 - 能确定违规则拦截或降级；不能确定则标记 `needs_more_review=true`。
 - 所有拦截必须记录原因、命中的规则、原字段、新字段。
+- 可以一次返回多个 finding 和 patch，不需要拆成多个 agent。
 
 ### 4. V4 第一版必须拦截的违规信号
 
-#### 4.1 人名和号码污染
+#### 4.1 人名、号码和身份污染
 
-V4 继续不追踪球员身份。第一版硬拦截只管人名和号码：
+V4 继续不追踪球员身份。第一版硬拦截：
 
 - 球员姓名，例如从字幕 OCR 或模型猜测来的姓名。
 - 球衣号码，例如 `10号`、`23号`、`#7`。
 - 未经任务要求的教练姓名、裁判姓名、个人姓名。
-
-位置/身份标签暂时不作为 V4 第一版拦截项，例如前锋、后卫、中场、队长、主罚手。生成层仍然应尽量避免写这些身份，但 guardrail 不因为这类词单独 fail。
+- 身份标签，例如前锋、后卫、门将、队长、主罚手、替补球员等。
 
 如果为了表达射门被化解，优先写：
 
@@ -873,7 +874,7 @@ V4 继续不追踪球员身份。第一版硬拦截只管人名和号码：
 - “射门被化解”
 - “防守方完成扑救”
 
-而不是在最终稿里保留具体人名或号码。
+而不是在最终稿里保留具体人名、号码或身份。
 
 #### 4.2 非 V4 事项集合的事件类型
 
@@ -900,28 +901,7 @@ foul_card_dispute, offside, substitution, celebration, half_full_time
 
 其中 `replay`、`scoreboard`、`close_up` 可以作为 evidence，但不能作为最终事项。
 
-#### 4.3 动作和细节必须有事件证据支撑
-
-第一版不要做过硬的“动作表白名单”。射门、扑救、偏出、传中、投球等动作，如果 narrative 或 evidence 本身支持，可以保留。guardrail 只拦截这两类问题：
-
-- 把没有证据的动作写成独立事实，例如 evidence 只说“进攻”却输出“头球攻门”“凌空抽射”“补射破门”。
-- 把不属于目标事项集合的普通动作升级成独立事项，例如普通传球、普通带球、普通争抢被单列为 final event。
-
-技术指标和解释性标签也要谨慎：速度、旋转率、距离、角度、概率、xG、百分比、故意犯规、战术犯规、情绪失控、世界波等，如果没有明确 evidence，不进入 final event。第一版不做 report 全文事实扫描，但 final event 的 title/evidence/script_angle 不能互相支撑时要标记 `needs_more_review=true`。
-
-#### 4.4 比分链矛盾
-
-比分链是第一版重点拦截项。所有 `goal` 必须进入比分链检查：
-
-- goal 序列必须能形成连续比分链，例如 `0-0 -> 1-0 -> 2-0`，不能跳跃、倒退、重复新增。
-- 已知最终比分时，goal 数量必须能解释最终比分；如果最终比分是 `7-1`，链上必须能解释 8 个进球。
-- 同一比分下的入网、庆祝、回放、进球字幕，只能作为同一主进球的 evidence，不能自动生成新 `goal`。
-- 如果后续 scoreboard 明确确认 `1-0`，不能因为短窗口 image review 没看到入网瞬间就把首球删除。
-- 如果某个 goal 缺少 `score_before/score_after` 或比分证据，先标红进入 `needs_more_review=true`，不要静默丢掉，也不要让 report 直接写成确定事实。
-
-比分链检查需要 structured score fields；如果当前 event 没有这些字段，guardrail finding 应明确写 `missing_score_chain_fields`，并保留 event_id、video_timestamp、match_time 方便回查。
-
-#### 4.5 JSON/schema 异常
+#### 4.3 JSON/schema 异常
 
 V4 继承 JSON repair 和 strict schema 验收：
 
@@ -934,58 +914,67 @@ V4 继承 JSON repair 和 strict schema 验收：
 
 这条就是 C0002 类问题的补丁：模型看到了首球，也写了首球，但后半段 JSON 坏掉时，解析器不能从坏 JSON 里捞最后一个内部小对象当成功结果。
 
-#### 4.6 第一版暂不纳入硬拦截的项目
+#### 4.4 第一版暂不纳入硬拦截的项目
 
 以下项目先写清楚，但不作为 V4 第一版 guardrail fail 条件：
 
-- 位置/身份标签，例如前锋、后卫、主罚手、队长。
-- 射门结果和比分状态冲突，例如“被扑出但比分变化”。这类先交给事项生成和 review；guardrail 第一版只检查比分链连续性。
+- 比分链断裂或比分链不连续；这类前置到 OCR/比分牌 panel 和事项生成/review 阶段，不放进 guardrail。
+- 射门结果和比分状态冲突，例如“被扑出但比分变化”。这类先交给 narrative 前置 OCR 和事项生成/review。
 - 定位球时间点漂移，例如 corner/free_kick/penalty 的 `taken/result` 阶段是否被误当获得判罚。
 - 视频时间与比赛时间混淆；V3 report 层已经修过，第一版不重复做硬拦截。
 - report 全文新增事实扫描；第一版只保证 report 读取 guarded events。
-- 过硬的动作表细节白名单；第一版只拦截无证据支撑或升级成独立事项的动作。
+- 过硬的动作表细节白名单；射门、扑救、偏出、传中、投球等动作只要 evidence 支持即可保留。
 
 ### 5. 从 V2/V3 回忆出的拦截项
 
 第一版应落地的项目：
 
-1. replay 误升新进球：回放、庆祝、进球信息条复现不能自动变成新进球。
-2. 首球误杀：如果后续 scoreboard 明确确认 `1-0` 和进球信息，不能因为短窗口图片 review 看不见入网瞬间就 reject。
-3. 缺失进球链：最终比分是 `7-1` 时，进球链必须解释 8 个进球；少球要标红。
-4. 点球链断裂：点球判罚和点球进球如果同时存在，要能用 `linked_event_id` 关联，不能静默丢一边。
-5. JSON fragment 误接收：顶层 key 不对、截断、内部片段被 parse 成功，都必须失败重试。
-6. 非法 event type 下沉：`scoreboard/replay/close_up` 等只能作为 evidence，不能作为最终事项。
-7. 人名和号码污染：换人、进球、射门都不能下沉具体姓名和号码。
+1. JSON fragment 误接收：顶层 key 不对、截断、内部片段被 parse 成功，都必须失败重试。
+2. 非法 event type 下沉：`scoreboard/replay/close_up` 等只能作为 evidence，不能作为最终事项。
+3. 人名、号码和身份污染：换人、进球、射门都不能下沉具体姓名、号码、前锋/后卫/门将/队长/主罚手等身份。
 
 后续可选扩展，但不进第一版硬拦截：
 
-1. 第三方队名污染：非本场队名进入 final/report。
-2. report 编造技术指标：速度、旋转、距离、概率、百分比。
-3. 不确定事项被写实：`probable/uncertain` 在 report 中被写成确定发生。
-4. 换人位置污染：换人写上下场位置或身份。
-5. 低价值庆祝单列过多：庆祝默认挂到主进球，除非确实是独立高价值镜头。
-6. 定位球时间点漂移。
-7. 射门结果和比分状态冲突。
+1. replay 误升新进球。
+2. 首球误杀。
+3. 缺失进球链。
+4. 点球链断裂。
+5. 第三方队名污染。
+6. report 编造技术指标。
+7. 不确定事项被写实。
+8. 低价值庆祝单列过多。
+9. 定位球时间点漂移。
+10. 射门结果和比分状态冲突。
 
 ### 6. V4 最小实现建议
 
 第一版 V4 不需要重写全链路，先做四个补丁即可：
 
-1. 在 text event/final schema 里增加比分链字段：`score_before`、`score_after`、`score_evidence_timestamp`、`score_evidence_source`、`scoreboard_relation`。`shot_outcome` 可以作为辅助字段，`set_piece_phase` 暂不作为第一版 guardrail 必填项。
-2. 在 final consolidation 后新增 `guardrail_interceptor.py`，先跑确定性本地检查：人名/号码扫描、event_type allowlist、比分链连续性、JSON/schema 验收状态。
-3. 输出 `final_events_guarded_v4.json` 和 `guardrail_findings.json`。finding 至少包含 `rule_id`、`severity`、`event_id`、`video_timestamp`、`match_time`、`field`、`original_value`、`action`。
+1. 在 frame narration / narrative prompt 里前置 OCR/比分牌面板要求：射门窗口必须先记录比分、比赛分钟、进球信息条和可见字幕，再描述射门姿态和结果。
+2. 在 final consolidation 后新增 `guardrail_interceptor.py`，整包读取 `final_events.json`，一次交给 guardrail agent 检查人名/号码/身份污染、非法 event type、JSON/schema 异常。
+3. 输出 `final_events_guarded_v4.json`、`guardrail_findings.json`、`guardrail_patches.json`。finding 至少包含 `rule_id`、`severity`、`event_id`、`video_timestamp`、`match_time`、`field`、`original_value`、`action`。
 4. report 只读取 `final_events_guarded_v4.json`，不直接消费 raw final events，也不自己新增事项。
 
-拦截层不是新的生成器。能本地确定的问题直接拦截或降级；不能确定的问题只标记 `needs_more_review=true`，不在 guardrail 里补写剧情。
+拦截层不是新的生成器。一个 guardrail agent 可以一次返回多个 finding 和 patch；本地 patch executor 只执行安全补丁。人名/号码/身份污染可以清洗，非法 event type 可以删除、合并为 evidence 或标 `needs_more_review=true`，JSON/schema 异常必须失败重试。
 
 ### 7. Guardrail token budget
 
 当前 V3 `final_events.json` 有 40 条事项。粗略按中英混合 JSON 估算：
 
-- 本地确定性拦截：0 model input tokens。人名/号码、event_type、比分链、JSON/schema 都可以先本地完成。
 - 整个 event compact JSON：约 18,786 chars，约 5.3k-7.9k tokens，中位约 6.3k。
 - 整个 event pretty JSON：约 25,914 chars，约 6.9k-10.3k tokens，中位约 8.2k。
-- guardrail compact pack：只带 `event_id/video_timestamp/match_time/period/event_type/title/certainty/importance/linked_event_id/evidence/score fields`，约 11,416 chars，约 3.3k-5.0k tokens，中位约 4.0k，平均约 100 tokens/event。
-- minimal pack：只带 `event_id/video_timestamp/match_time/event_type/title/evidence`，约 4,809 chars，约 1.9k-2.8k tokens，中位约 2.3k，平均约 57 tokens/event。
+- 加上 guardrail 指令后，整包输入通常仍可控制在 10K tokens 左右。
+- guardrail 输出只需要 `findings` 和 `patches`，不需要重写全部事项。
 
-结论：第一版不需要把 whole event 丢给模型。优先用本地 deterministic guardrail；如果后续确实需要模型做语义复核，只发送 compact pack，并且带上 event_id、video_timestamp、match_time，方便把 finding 精确落回原事项。
+结论：完整事项不超过 10K tokens 时，可以直接整包丢给一个 guardrail agent。这里不需要一堆 agent，也不需要从比分链返工。复数问题就让同一个 agent 输出多个 findings，本地按 patch 类型逐个处理；最多跑两轮 guardrail，仍有问题就把 finding 留给人工看。
+
+### 8. V4 相对 V3 的进步
+
+V3 已经完成了三件核心事：固定 10 类事项、清洗 final events、输出固定 Markdown/report 结构。V4 在这个基础上只补关键防线：
+
+1. 射门和比分判断前置：先让 narrative 看到 OCR/比分牌面板，再写射门姿态和结果，减少后面靠拦截层补救。
+2. report 前新增 guardrail：V3 是 `final_events_clean_v3 -> report`，V4 变成 `final_events_clean_v4 -> guardrail -> final_events_guarded_v4 -> report`。
+3. 更干净的人物约束：不让人名、号码、身份标签进入最终事项和解说稿。
+4. 更硬的 event type 边界：`replay/scoreboard/close_up` 只能做 evidence，不能下沉成 final event。
+5. 更严格的 JSON/schema 接收：顶层结构不对、截断、内部 fragment 被误 parse，都不能当成功结果。
+6. 多问题一次处理：完整事项整包进一个 guardrail agent，输出多条 findings/patches，不拆一堆小 agent。
