@@ -54,6 +54,14 @@ EVENT_TYPES_V3 = [
 EVENT_TYPES = EVENT_TYPES_V2
 
 
+def _is_fixed_event_schema(schema_version: str) -> bool:
+    return schema_version in {"v3", "v4"}
+
+
+def _clean_schema_suffix(schema_version: str) -> str:
+    return "v4" if schema_version == "v4" else "v3"
+
+
 @dataclass
 class EventAgentOptions:
     descriptions_path: Path
@@ -101,8 +109,9 @@ class EventAgentRunner:
             write_json(self.out_dir / "text_agent_events.json", [])
             write_json(self.out_dir / "image_review_results.json", [])
             write_json(self.out_dir / "final_events.json", {"final_events": []})
-            if self.options.schema_version == "v3":
-                write_json(self.out_dir / "final_events_clean_v3.json", {"final_events": [], "match_time_anchors": []})
+            if _is_fixed_event_schema(self.options.schema_version):
+                suffix = _clean_schema_suffix(self.options.schema_version)
+                write_json(self.out_dir / f"final_events_clean_{suffix}.json", {"final_events": [], "match_time_anchors": []})
                 write_json(self.out_dir / "match_time_anchors.json", [])
             write_text(self.out_dir / "event_agent_report.md", "# Event Agent Report\n")
             return self.out_dir
@@ -125,8 +134,9 @@ class EventAgentRunner:
 
         final = self._run_final_consolidation(text_events, review_results)
         write_json(self.out_dir / "final_events.json", final)
-        if self.options.schema_version == "v3":
-            write_json(self.out_dir / "final_events_clean_v3.json", final)
+        if _is_fixed_event_schema(self.options.schema_version):
+            suffix = _clean_schema_suffix(self.options.schema_version)
+            write_json(self.out_dir / f"final_events_clean_{suffix}.json", final)
             write_json(self.out_dir / "match_time_anchors.json", final.get("match_time_anchors") or [])
         write_text(self.out_dir / "event_agent_report.md", self._build_report(text_results, text_events, review_results, final))
         write_json(self.out_dir / "event_agent_runtime_summary.json", self._runtime_summary(text_results, review_results, final))
@@ -146,8 +156,9 @@ class EventAgentRunner:
         review_results = read_json(review_results_path)
         final = self._run_final_consolidation(text_events, review_results)
         write_json(self.out_dir / "final_events.json", final)
-        if self.options.schema_version == "v3":
-            write_json(self.out_dir / "final_events_clean_v3.json", final)
+        if _is_fixed_event_schema(self.options.schema_version):
+            suffix = _clean_schema_suffix(self.options.schema_version)
+            write_json(self.out_dir / f"final_events_clean_{suffix}.json", final)
             write_json(self.out_dir / "match_time_anchors.json", final.get("match_time_anchors") or [])
         write_text(self.out_dir / "event_agent_report.md", self._build_report(text_results, text_events, review_results, final))
         write_json(self.out_dir / "event_agent_runtime_summary.json", self._runtime_summary(text_results, review_results, final))
@@ -229,9 +240,10 @@ class EventAgentRunner:
         )
 
     def _run_one_text_chunk(self, chunk: dict[str, Any], raw_path: Path, request_fingerprint: str) -> dict[str, Any]:
-        if self.options.schema_version == "v3":
+        if _is_fixed_event_schema(self.options.schema_version):
+            version_label = self.options.schema_version.upper()
             system_prompt = (
-                "你是世界杯视频解说 Harness 的 V3 事项定位 Agent。你只能基于上一阶段视觉观察员写出的文本判断，"
+                f"你是世界杯视频解说 Harness 的 {version_label} 事项定位 Agent。你只能基于上一阶段视觉观察员写出的文本判断，"
                 "按固定 10 类事项输出，不能编造画面没有给出的事实。只输出 JSON。"
             )
         else:
@@ -294,10 +306,12 @@ class EventAgentRunner:
         return None
 
     def _text_prompt_version(self) -> str:
+        if self.options.schema_version == "v4":
+            return "v4_ocr_score_panel_fixed_event_set"
         return "v3_fixed_event_set" if self.options.schema_version == "v3" else "v2_more_events"
 
     def _build_text_agent_prompt(self, chunk: dict[str, Any]) -> str:
-        if self.options.schema_version == "v3":
+        if _is_fixed_event_schema(self.options.schema_version):
             return self._build_text_agent_prompt_v3(chunk)
         return self._build_text_agent_prompt_v2(chunk)
 
@@ -364,16 +378,27 @@ class EventAgentRunner:
 }}"""
 
     def _build_text_agent_prompt_v3(self, chunk: dict[str, Any]) -> str:
-        return f"""你将看到连续约 12 分钟的足球比赛视觉 narrative。你的任务是基于 narrative 做 V3 事项定位。
+        version_label = self.options.schema_version.upper()
+        v4_ocr_rule = ""
+        if self.options.schema_version == "v4":
+            v4_ocr_rule = """
+V4 新增前置规则：
+- 判断射门、入网、扑出、庆祝、点球或任意球直接攻门前，必须先读 observation 里的 visible_text、scoreboard、score_panel、score_panel_summary。
+- 如果 OCR/比分牌面板显示比分未变，不要把回放或庆祝误升成新进球。
+- 如果 OCR/比分牌面板看不清，保留 `certainty=probable|uncertain`，不要编造比分链。
+- evidence 里尽量写清“比分牌/OCR 是否支持该射门结果”，但不要输出球员姓名、号码或身份。
+"""
+        return f"""你将看到连续约 12 分钟的足球比赛视觉 narrative。你的任务是基于 narrative 做 {version_label} 事项定位。
 
 本场比赛固定信息：
 - 比赛双方固定为：德国 vs 库拉索。
 - CURAÇAO、CURACAO、Curaçao、库拉索都指库拉索。
 - 禁止输出哥伦比亚、委内瑞拉、美国、巴拉圭等非本场球队名。
-- V3 不追踪球员身份、姓名、号码和场上位置。不要输出人名、球衣号码、前锋/后卫/门将/队长等身份标签。
+- {version_label} 不追踪球员身份、姓名、号码和场上位置。不要输出人名、球衣号码、前锋/后卫/门将/队长等身份标签。
 - 最多写到球队层级，例如“德国队球员”“库拉索球员”；换人也只记录某队出现换人，不记录上下场球员姓名。
+{v4_ocr_rule}
 
-V3 只允许输出这 10 类事项：
+{version_label} 只允许输出这 10 类事项：
 {", ".join(EVENT_TYPES_V3)}
 
 事项定义：
@@ -462,7 +487,7 @@ V3 只允许输出这 10 类事项：
                     "source": "narration_text_agent",
                     **event,
                 }
-                if self.options.schema_version == "v3":
+                if _is_fixed_event_schema(self.options.schema_version):
                     video_timestamp = item.get("video_timestamp") or item.get("timestamp") or item.get("review_timestamp")
                     item["video_timestamp"] = video_timestamp
                     item["timestamp"] = video_timestamp
@@ -504,7 +529,7 @@ V3 只允许输出这 10 类事项：
             "review_id",
             {
                 "stage": "image_review",
-                "prompt_version": "v3" if self.options.schema_version == "v3" else "v1",
+                "prompt_version": self.options.schema_version if _is_fixed_event_schema(self.options.schema_version) else "v1",
                 "max_tokens": 2600,
                 "temperature": self.options.temperature,
                 "review_window_seconds": self.options.review_window_seconds,
@@ -602,7 +627,7 @@ V3 只允许输出这 10 类事项：
             "ok": parse_error is None and finish_reason != "length",
             "request_fingerprint": request_fingerprint,
             "request_max_tokens": 2600,
-            "prompt_version": "v3" if self.options.schema_version == "v3" else "v1",
+            "prompt_version": self.options.schema_version if _is_fixed_event_schema(self.options.schema_version) else "v1",
             "elapsed_seconds": round(time.time() - started, 3),
             "usage": response.raw.get("usage"),
             "finish_reason": finish_reason,
@@ -640,8 +665,8 @@ V3 只允许输出这 10 类事项：
             f"- FRAME {frame.get('frame_index')}: {frame.get('timestamp')}"
             for frame in frames
         )
-        if self.options.schema_version == "v3":
-            return f"""你需要复核一个由 V3 文本事项定位 Agent 提出的候选事项。
+        if _is_fixed_event_schema(self.options.schema_version):
+            return f"""你需要复核一个由 {self.options.schema_version.upper()} 文本事项定位 Agent 提出的候选事项。
 
 候选事项：
 {json.dumps(event, ensure_ascii=False, indent=2)}
@@ -658,7 +683,7 @@ V3 只允许输出这 10 类事项：
 3. 如果图片没有看到但 narrative 明确，不要轻易 rejected，优先 verdict=not_visible_in_window 或 uncertain。
 4. 只有图片和 narrative 明确冲突时，才 verdict=rejected。
 5. 如果事件类型或视频时间戳需要修正，请给出 corrected_video_timestamp 和 event_type。
-6. V3 只允许 event_type 属于：{", ".join(EVENT_TYPES_V3)}。
+6. {self.options.schema_version.upper()} 只允许 event_type 属于：{", ".join(EVENT_TYPES_V3)}。
 7. 不要输出 replay、attack_highlight、dead_ball、crowd 等 V2/泛化类型；回放只能写入 visual_evidence 或 notes。
 8. 不要识别、保留或输出球员姓名、球衣号码、前锋/后卫/门将/队长等身份标签，最多写“德国队球员”“库拉索球员”。
 9. 只输出严格 JSON。
@@ -715,7 +740,7 @@ V3 只允许输出这 10 类事项：
         for result in review_results:
             parsed = result.get("parsed")
             if isinstance(parsed, dict):
-                if self.options.schema_version == "v3":
+                if _is_fixed_event_schema(self.options.schema_version):
                     parsed = {
                         "event_id": parsed.get("event_id"),
                         "verdict": parsed.get("verdict"),
@@ -753,7 +778,7 @@ V3 只允许输出这 10 类事项：
                     "parse_error": result.get("parse_error"),
                 }
             )
-        if self.options.schema_version == "v3":
+        if _is_fixed_event_schema(self.options.schema_version):
             candidate_pack = [
                 {
                     "event_id": event.get("event_id"),
@@ -796,10 +821,12 @@ V3 只允许输出这 10 类事项：
                 }
                 for event in text_events
             ]
+        fixed_schema = _is_fixed_event_schema(self.options.schema_version)
+        clean_suffix = _clean_schema_suffix(self.options.schema_version)
         system_content = (
-            "你是世界杯解说脚本的 V3 事项清洗总编 Agent。你需要基于文本定位结果和图片复核结果，"
-            "输出 final_events_clean_v3.json。不要输出球员姓名、号码、位置或身份。只输出 JSON。"
-            if self.options.schema_version == "v3"
+            f"你是世界杯解说脚本的 {self.options.schema_version.upper()} 事项清洗总编 Agent。你需要基于文本定位结果和图片复核结果，"
+            f"输出 final_events_clean_{clean_suffix}.json。不要输出球员姓名、号码、位置或身份。只输出 JSON。"
+            if fixed_schema
             else (
                 "你是世界杯解说脚本的总编 Agent。你需要基于文本定位结果和图片复核结果，"
                 "合并重复事件，剔除证据不足事件，输出最终关键事件时间线。只输出 JSON。"
@@ -814,7 +841,7 @@ V3 只允许输出这 10 类事项：
         ]
         final_max_tokens = self.options.final_consolidation_max_tokens
         if final_max_tokens is None:
-            final_max_tokens = 14000 if self.options.schema_version == "v3" else 9000
+            final_max_tokens = 14000 if fixed_schema else 9000
         started = time.time()
         response = None
         parsed = None
@@ -848,7 +875,7 @@ V3 只允许输出这 10 类事项：
         }
         write_json(self.out_dir / "final_consolidation_raw.json", result)
         if isinstance(parsed, dict):
-            if self.options.schema_version == "v3" and not self.options.pure_model_output:
+            if fixed_schema and not self.options.pure_model_output:
                 parsed = _sanitize_v3_final(parsed, self.options.final_max_events)
             return parsed
         return {"final_events": [], "parse_error": parse_error, "raw": response.content}
@@ -862,13 +889,14 @@ V3 只允许输出这 10 类事项：
         return None
 
     def _build_final_prompt(self, candidate_pack: list[dict[str, Any]], review_pack: list[dict[str, Any]]) -> str:
-        if self.options.schema_version == "v3":
+        if _is_fixed_event_schema(self.options.schema_version):
+            clean_suffix = _clean_schema_suffix(self.options.schema_version)
             return f"""下面是两部分证据：
-1. V3 文本事项定位 Agent 从整场视觉观察文本中提出的候选事项。
+1. {self.options.schema_version.upper()} 文本事项定位 Agent 从整场视觉观察文本中提出的候选事项。
 2. 对其中 needs_image_review=true 的事项进行图片回看后的复核结果。
 
-你的任务是生成 `final_events_clean_v3.json`：
-1. 只保留 V3 的 10 类事项：{", ".join(EVENT_TYPES_V3)}。
+你的任务是生成 `final_events_clean_{clean_suffix}.json`：
+1. 只保留 {self.options.schema_version.upper()} 的 10 类事项：{", ".join(EVENT_TYPES_V3)}。
 2. 合并重复事项。庆祝、回放证据、同一进球的后续字幕必须挂到主事项，默认不要把 linked celebration 单列为 final_events。
 3. 点球进球可以同时体现 penalty 和 goal，但必须用 linked_event_id 关联，不能写成两个独立进球。
 4. 剔除被图片复核 rejected 的事项；not_visible_in_window 或 uncertain 可以保留，但 certainty 必须如实标注。

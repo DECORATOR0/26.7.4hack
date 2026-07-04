@@ -22,7 +22,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-reviews", type=int, default=None, help="Cap image review calls for probing")
     parser.add_argument("--final-max-events", type=int, default=30, help="Max final events requested from final editor agent")
     parser.add_argument("--final-consolidation-max-tokens", type=int, default=None, help="Max output tokens for final consolidation")
-    parser.add_argument("--schema-version", choices=["v2", "v3"], default="v2", help="Event schema/prompt version")
+    parser.add_argument("--schema-version", choices=["v2", "v3", "v4"], default="v2", help="Event schema/prompt version")
     parser.add_argument("--final-only", action="store_true", help="Only rerun final consolidation from cached text/review outputs")
     parser.add_argument("--pure-model-output", action="store_true", help="Write model outputs without local V3 content cleanup")
     parser.add_argument("--resume", action="store_true", help="Reuse completed raw text/review responses")

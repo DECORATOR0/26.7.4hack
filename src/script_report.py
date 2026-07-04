@@ -8,8 +8,9 @@ from pathlib import Path
 from typing import Any
 
 from .config import load_intern_config
+from .guardrail import _sanitize_identity_text
 from .intern_client import InternClient
-from .io_utils import ensure_dir, extract_json_object, read_json, write_json, write_text
+from .io_utils import ensure_dir, extract_json_object, read_json, timestamp_to_seconds, write_json, write_text
 
 
 @dataclass
@@ -36,11 +37,12 @@ class ScriptReportRunner:
         match_info = self._load_match_info()
 
         if self.options.no_model:
-            if self.options.report_version in {"v3", "v3_markdown"}:
+            if self.options.report_version in {"v3", "v3_markdown", "v4_markdown"}:
                 report_json = self._fallback_v3_json(events)
-                write_json(self.out_dir / "final_report_v3.json", report_json)
+                suffix = "v4" if self.options.report_version == "v4_markdown" else "v3"
+                write_json(self.out_dir / f"final_report_{suffix}.json", report_json)
                 markdown = self._v3_markdown(report_json)
-                write_text(self.out_dir / "final_report_v3.md", markdown)
+                write_text(self.out_dir / f"final_report_{suffix}.md", markdown)
             else:
                 markdown = self._fallback_markdown(events, match_info)
                 write_text(self.out_dir / "commentary_report.md", markdown)
@@ -49,6 +51,10 @@ class ScriptReportRunner:
 
         prompt = self._build_prompt(events, match_info)
         system_content = (
+            "你是世界杯比赛集锦解说脚本编辑。你只基于 final_events_guarded_v4 写最终交付 Markdown，"
+            "事项必须全量列出；解说文案要把有关联事项自然粘合，不要硬凑无关事项。输出必须是 Markdown。"
+            if self.options.report_version == "v4_markdown"
+            else (
             "你是世界杯比赛集锦解说脚本编辑。你只基于 final_events_clean_v3 写最终交付 Markdown，"
             "不能新增事实，不能输出推理过程。输出必须是 Markdown。"
             if self.options.report_version == "v3_markdown"
@@ -59,6 +65,7 @@ class ScriptReportRunner:
             else (
                 "你是世界杯比赛集锦解说脚本编辑。你只基于给定关键事件写稿，"
                 "不能编造没有证据的球员、比分、判罚或技术指标。输出 Markdown。"
+            )
             )
             )
         )
@@ -87,9 +94,12 @@ class ScriptReportRunner:
             "content": response.content,
         }
         write_json(self.out_dir / "script_report_raw.json", raw)
-        if self.options.report_version == "v3_markdown":
+        if self.options.report_version in {"v3_markdown", "v4_markdown"}:
             markdown = response.content.strip() + "\n"
-            write_text(self.out_dir / "final_report_v3.md", markdown)
+            if self.options.report_version == "v4_markdown":
+                markdown = "\n".join(_sanitize_identity_text(line) for line in markdown.splitlines()) + "\n"
+            suffix = "v4" if self.options.report_version == "v4_markdown" else "v3"
+            write_text(self.out_dir / f"final_report_{suffix}.md", markdown)
         elif self.options.report_version == "v3":
             try:
                 report_json = extract_json_object(response.content)
@@ -130,9 +140,17 @@ class ScriptReportRunner:
         else:
             events = []
         normalized = [event for event in events if isinstance(event, dict)]
+        period_order = {
+            "pre_match": 0,
+            "first_half": 1,
+            "halftime": 2,
+            "second_half": 3,
+            "fulltime": 4,
+            "unknown": 5,
+        }
         normalized.sort(
             key=lambda event: (
-                str(event.get("period") or ""),
+                period_order.get(str(event.get("period") or "unknown"), 5),
                 int(event.get("match_minute") or 0),
                 int(event.get("stoppage_minute") or 0),
                 str(event.get("video_timestamp") or event.get("timestamp") or event.get("start") or ""),
@@ -141,6 +159,8 @@ class ScriptReportRunner:
         return normalized
 
     def _build_prompt(self, events: list[dict[str, Any]], match_info: dict[str, Any]) -> str:
+        if self.options.report_version == "v4_markdown":
+            return self._build_prompt_v4_markdown(events, match_info)
         if self.options.report_version == "v3_markdown":
             return self._build_prompt_v3_markdown(events, match_info)
         if self.options.report_version == "v3":
@@ -259,6 +279,102 @@ V3 final events：
 8. 队名固定为德国 vs 库拉索；禁止出现其他国家队名。
 9. 不要输出额外章节，不要输出制作提示、内部备注、短视频口播版。
 10. 输出必须是最终可交付 Markdown。"""
+
+    def _build_prompt_v4_markdown(self, events: list[dict[str, Any]], match_info: dict[str, Any]) -> str:
+        compact_events = [
+            {
+                "event_id": event.get("event_id"),
+                "match_time": event.get("match_time"),
+                "video_timestamp": event.get("video_timestamp") or event.get("timestamp"),
+                "period": event.get("period"),
+                "event_type": event.get("event_type"),
+                "title": event.get("title"),
+                "certainty": event.get("certainty"),
+                "evidence_level": event.get("evidence_level"),
+                "confidence": event.get("confidence"),
+                "importance": event.get("importance"),
+                "evidence": event.get("evidence"),
+                "needs_more_review": event.get("needs_more_review"),
+                "script_angle": event.get("script_angle"),
+                "linked_event_id": event.get("linked_event_id"),
+                "source_event_ids": event.get("source_event_ids"),
+            }
+            for event in events
+        ]
+        commentary_groups = self._build_v4_commentary_groups(compact_events)
+        return f"""请只基于给定比赛信息和 final_events_guarded_v4 生成最终交付 Markdown。
+
+比赛信息：
+{json.dumps(match_info, ensure_ascii=False, indent=2)}
+
+final_events_guarded_v4：
+{json.dumps(compact_events, ensure_ascii=False, indent=2)}
+
+解说分组 commentary_groups：
+{json.dumps(commentary_groups, ensure_ascii=False, indent=2)}
+
+输出要求：
+1. 只输出 Markdown，不要 JSON，不要解释生成过程。
+2. Markdown 只能包含两个一级标题，顺序固定：
+   # 事项列表
+   # 解说文案
+3. 事项列表必须把输入里的每一条 event 全部列出来，不能漏。用 Markdown 表格，列固定为：序号、比赛时间、视频时间戳、事项类型、事件标题、确定性、证据摘要。
+4. 解说文案按比赛时间从前往后写。每个段落格式固定为：
+   ## 第XX分钟：小标题
+   一小段激情解说文案。
+   例如 `6'` 写成 `第6分钟`，`45+5'` 写成 `第45+5分钟`；如果 match_time 不清楚，就用视频时间写 `视频00:14:12`。
+5. 解说文案必须严格按 commentary_groups 输出：一个 group 只写一个 `## 第XX分钟：小标题` 段落，组内多个 event 必须粘合到同一段。
+6. 有明确关联的事项要粘合成同一个解说段，例如：
+   - `linked_event_id` 指向同一主事项。
+   - 点球判罚和紧接着的点球射门/进球。
+   - 任意球或角球和紧接着由它直接产生的射门/进球。
+   - 同一进球后的庆祝或回放证据。
+7. 没有关联的事项不要硬凑；相邻但不是同一动作链的事项必须分段写。
+8. 解说文案风格参考高燃解说稿：有现场感、节奏感，一段即可，不要写成长篇分析。
+9. 只能基于输入 events 写，不要新增没有证据的事实；不能新增比分、球员姓名、号码、身份、技术指标、判罚原因。
+10. 严禁出现身份词：门将、守门员、前锋、后卫、中场、队长、主罚手、替补球员；用“防守方”“球员”“球队人员”这类泛称替代。
+11. 如果事项 certainty=probable 或 uncertain，文稿中用“疑似”“可能”“从画面看”等稳妥措辞。
+12. 队名固定为德国 vs 库拉索；禁止出现其他国家队名。
+13. 不要输出额外章节，不要输出制作提示、内部备注、短视频口播版。
+14. 输出必须是最终可交付 Markdown。"""
+
+    @staticmethod
+    def _build_v4_commentary_groups(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        groups: list[dict[str, Any]] = []
+        for event in events:
+            if groups and _v4_events_related(groups[-1]["events"], event):
+                groups[-1]["events"].append(event)
+                groups[-1]["event_ids"].append(event.get("event_id"))
+                groups[-1]["titles"].append(event.get("title"))
+                continue
+            groups.append(
+                {
+                    "group_id": f"G{len(groups) + 1:04d}",
+                    "heading_time": _display_minute(event),
+                    "event_ids": [event.get("event_id")],
+                    "titles": [event.get("title")],
+                    "events": [event],
+                }
+            )
+        return [
+            {
+                "group_id": group["group_id"],
+                "heading_time": group["heading_time"],
+                "event_ids": group["event_ids"],
+                "title_hint": " / ".join(str(title) for title in group["titles"] if title),
+                "events": [
+                    {
+                        "event_id": item.get("event_id"),
+                        "match_time": item.get("match_time"),
+                        "event_type": item.get("event_type"),
+                        "title": item.get("title"),
+                        "certainty": item.get("certainty"),
+                    }
+                    for item in group["events"]
+                ],
+            }
+            for group in groups
+        ]
 
     def _build_prompt_v3(self, events: list[dict[str, Any]], match_info: dict[str, Any]) -> str:
         compact_events = [
@@ -437,6 +553,48 @@ final_events_clean_v3：
             "total_tokens": usage.get("total_tokens"),
             "markdown_chars": len(markdown),
         }
+
+
+def _v4_events_related(group_events: list[dict[str, Any]], event: dict[str, Any]) -> bool:
+    if not group_events:
+        return False
+    previous = group_events[-1]
+    current_type = str(event.get("event_type") or "")
+    previous_type = str(previous.get("event_type") or "")
+    group_ids = {str(item.get("event_id") or "") for item in group_events}
+    linked_event_id = str(event.get("linked_event_id") or "")
+    if linked_event_id and linked_event_id in group_ids:
+        return True
+
+    current_seconds = timestamp_to_seconds(event.get("video_timestamp") or event.get("timestamp"))
+    previous_seconds = timestamp_to_seconds(previous.get("video_timestamp") or previous.get("timestamp"))
+    close = abs(current_seconds - previous_seconds) <= 120
+    same_match_time = bool(event.get("match_time")) and event.get("match_time") == previous.get("match_time")
+
+    if current_type == "celebration" and close and any(item.get("event_type") == "goal" for item in group_events):
+        return True
+    if previous_type == "celebration" and close and current_type == "goal":
+        return True
+    if same_match_time and {current_type, previous_type} & {"goal", "celebration"}:
+        return True
+    if previous_type in {"corner", "free_kick", "penalty"} and current_type in {"shot_chance", "goal", "celebration"} and close:
+        return True
+    if previous_type == "goal" and current_type == "celebration" and close:
+        return True
+    if previous_type == "substitution" and current_type == "substitution" and close and same_match_time:
+        return True
+    return False
+
+
+def _display_minute(event: dict[str, Any]) -> str:
+    match_time = str(event.get("match_time") or "").strip()
+    if match_time:
+        text = match_time.replace("'", "").strip()
+        if ":" in text:
+            text = text.split(":", 1)[0]
+        return f"第{text}分钟"
+    video_time = event.get("video_timestamp") or event.get("timestamp") or ""
+    return f"视频{video_time}"
 
 
 def _sanitize_report_identity_text(value: Any) -> str:

@@ -1,0 +1,1857 @@
+{
+  "final_events": [
+    {
+      "event_id": "F0001",
+      "video_timestamp": "00:09:32",
+      "timestamp": "00:09:32",
+      "match_time": "25'",
+      "period": "first_half",
+      "match_minute": 25,
+      "stoppage_minute": 0,
+      "match_time_source": "scoreboard",
+      "event_type": "shot_chance",
+      "title": "德国队禁区前沿射门尝试被解围",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.85,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0003"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队进攻至禁区前沿，射门被库拉索防守球员倒地化解，比分0-0"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队禁区前沿射门被化解，库拉索防守稳固"
+    },
+    {
+      "event_id": "F0002",
+      "video_timestamp": "00:11:08",
+      "timestamp": "00:11:08",
+      "match_time": "2'",
+      "period": "first_half",
+      "match_minute": 2,
+      "stoppage_minute": 0,
+      "match_time_source": "scoreboard",
+      "event_type": "shot_chance",
+      "title": "德国队禁区内射门被解围",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.85,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0004"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队禁区内射门，库拉索防守方和防守球员解围，比分0-0"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队禁区内射门被库拉索防守方和防守球员化解"
+    },
+    {
+      "event_id": "F0003",
+      "video_timestamp": "00:17:14",
+      "timestamp": "00:17:14",
+      "match_time": "7'",
+      "period": "first_half",
+      "match_minute": 7,
+      "stoppage_minute": 0,
+      "match_time_source": "estimated",
+      "event_type": "shot_chance",
+      "title": "德国队射门被扑出",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.9,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0007"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队球员禁区内射门，库拉索防守方扑救成功，球未入网"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队射门被库拉索防守方成功扑救"
+    },
+    {
+      "event_id": "F0004",
+      "video_timestamp": "00:19:26",
+      "timestamp": "00:19:26",
+      "match_time": "10'",
+      "period": "first_half",
+      "match_minute": 10,
+      "stoppage_minute": 0,
+      "match_time_source": "scoreboard",
+      "event_type": "shot_chance",
+      "title": "德国队射门被扑出",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.95,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0008"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队球员禁区内射门，库拉索防守方向右扑救成功"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队射门被库拉索防守方向右扑救化解"
+    },
+    {
+      "event_id": "F0005",
+      "video_timestamp": "00:20:44",
+      "timestamp": "00:20:44",
+      "match_time": "11'",
+      "period": "first_half",
+      "match_minute": 11,
+      "stoppage_minute": 0,
+      "match_time_source": "estimated",
+      "event_type": "shot_chance",
+      "title": "德国队射门被防守方扑出",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.85,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0009"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队禁区弧顶射门，库拉索防守方飞身扑救化解"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队禁区弧顶射门被库拉索防守方飞身扑救化解"
+    },
+    {
+      "event_id": "F0006",
+      "video_timestamp": "00:21:14",
+      "timestamp": "00:21:14",
+      "match_time": "11'",
+      "period": "first_half",
+      "match_minute": 11,
+      "stoppage_minute": 0,
+      "match_time_source": "estimated",
+      "event_type": "foul_card_dispute",
+      "title": "裁判与球员沟通判罚",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.9,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0010"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "裁判与库拉索球员及德国球员近距离沟通，疑似讨论判罚"
+      ],
+      "needs_more_review": false,
+      "script_angle": "裁判与双方球员沟通判罚，场上出现争议"
+    },
+    {
+      "event_id": "F0007",
+      "video_timestamp": "00:23:12",
+      "timestamp": "00:23:12",
+      "match_time": "14'",
+      "period": "first_half",
+      "match_minute": 14,
+      "stoppage_minute": 0,
+      "match_time_source": "estimated",
+      "event_type": "goal",
+      "title": "德国队进球，比分变为2-0",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.9,
+      "importance": "high",
+      "source_event_ids": [
+        "T0011"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队球员射门，球越过门线进入球网，进球确认"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队进球扩大比分优势，2-0领先"
+    },
+    {
+      "event_id": "F0008",
+      "video_timestamp": "00:23:16",
+      "timestamp": "00:23:16",
+      "match_time": "14'",
+      "period": "first_half",
+      "match_minute": 14,
+      "stoppage_minute": 0,
+      "match_time_source": "estimated",
+      "event_type": "celebration",
+      "title": "德国队进球庆祝",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.9,
+      "importance": "low",
+      "source_event_ids": [
+        "T0012"
+      ],
+      "linked_event_id": "F0007",
+      "evidence": [
+        "德国队球员进球后庆祝，库拉索防守方倒地"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队球员进球后庆祝，士气高涨"
+    },
+    {
+      "event_id": "F0009",
+      "video_timestamp": "00:29:50",
+      "timestamp": "00:29:50",
+      "match_time": "21'",
+      "period": "first_half",
+      "match_minute": 21,
+      "stoppage_minute": 0,
+      "match_time_source": "subtitle",
+      "event_type": "goal",
+      "title": "库拉索队进球扳平比分",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.9,
+      "importance": "high",
+      "source_event_ids": [
+        "T0014"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "库拉索队球员射门，球进入球门，比分1-1"
+      ],
+      "needs_more_review": false,
+      "script_angle": "库拉索队进球扳平比分，比赛进入胶着状态"
+    },
+    {
+      "event_id": "F0010",
+      "video_timestamp": "00:29:50",
+      "timestamp": "00:29:50",
+      "match_time": "21'",
+      "period": "first_half",
+      "match_minute": 21,
+      "stoppage_minute": 0,
+      "match_time_source": "subtitle",
+      "event_type": "celebration",
+      "title": "库拉索队进球庆祝",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.9,
+      "importance": "low",
+      "source_event_ids": [
+        "T0013"
+      ],
+      "linked_event_id": "F0009",
+      "evidence": [
+        "库拉索队球员及球迷庆祝进球，情绪激动"
+      ],
+      "needs_more_review": false,
+      "script_angle": "库拉索队球员和球迷庆祝进球，场面热烈"
+    },
+    {
+      "event_id": "F0011",
+      "video_timestamp": "00:34:52",
+      "timestamp": "00:34:52",
+      "match_time": "26:42",
+      "period": "first_half",
+      "match_minute": 26,
+      "stoppage_minute": 42,
+      "match_time_source": "narrative",
+      "event_type": "free_kick",
+      "title": "德国队获得前场任意球",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.9,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0015"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "裁判指向任意球点，双方球员在禁区附近准备开任意球"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队获得前场任意球机会，库拉索队排人墙防守"
+    },
+    {
+      "event_id": "F0012",
+      "video_timestamp": "00:35:44",
+      "timestamp": "00:35:44",
+      "match_time": "27:34",
+      "period": "first_half",
+      "match_minute": 27,
+      "stoppage_minute": 34,
+      "match_time_source": "narrative",
+      "event_type": "corner",
+      "title": "德国队获得角球",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.9,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0016"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队球员站在角球区，准备发角球"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队获得角球机会，库拉索队防守"
+    },
+    {
+      "event_id": "F0013",
+      "video_timestamp": "00:36:00",
+      "timestamp": "00:36:00",
+      "match_time": "27:50",
+      "period": "first_half",
+      "match_minute": 27,
+      "stoppage_minute": 50,
+      "match_time_source": "scoreboard",
+      "event_type": "foul_card_dispute",
+      "title": "裁判与球员交流判罚",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.9,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0017"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "裁判与库拉索球员及德国球员近距离交流，疑似讨论判罚"
+      ],
+      "needs_more_review": false,
+      "script_angle": "裁判介入处理场上争议，德国球员被铲倒后裁判做出判罚"
+    },
+    {
+      "event_id": "F0014",
+      "video_timestamp": "00:38:00",
+      "timestamp": "00:38:00",
+      "match_time": "29:50",
+      "period": "first_half",
+      "match_minute": 29,
+      "stoppage_minute": 50,
+      "match_time_source": "scoreboard",
+      "event_type": "corner",
+      "title": "德国队主罚角球",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0018"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队准备在右侧角球区开角球，双方球员在禁区内争抢"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队获得角球机会，球传入禁区后双方争抢，库拉索球员解围"
+    },
+    {
+      "event_id": "F0015",
+      "video_timestamp": "00:40:16",
+      "timestamp": "00:40:16",
+      "match_time": "32:06",
+      "period": "first_half",
+      "match_minute": 32,
+      "stoppage_minute": 6,
+      "match_time_source": "scoreboard",
+      "event_type": "penalty",
+      "title": "德国队获得点球",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.95,
+      "importance": "high",
+      "source_event_ids": [
+        "T0019"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国球员在禁区内被库拉索防守球员铲倒，裁判判罚点球"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队获得点球机会，球员主罚破门"
+    },
+    {
+      "event_id": "F0016",
+      "video_timestamp": "00:41:42",
+      "timestamp": "00:41:42",
+      "match_time": "32:22",
+      "period": "first_half",
+      "match_minute": 32,
+      "stoppage_minute": 22,
+      "match_time_source": "scoreboard",
+      "event_type": "shot_chance",
+      "title": "库拉索防守方精彩扑救",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.95,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0020"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "库拉索防守方高高跃起，单手将球托出横梁，完成扑救"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队进攻被库拉索防守方神勇化解，球被托出横梁"
+    },
+    {
+      "event_id": "F0017",
+      "video_timestamp": "00:42:12",
+      "timestamp": "00:42:12",
+      "match_time": "32:30",
+      "period": "first_half",
+      "match_minute": 32,
+      "stoppage_minute": 30,
+      "match_time_source": "estimated",
+      "event_type": "substitution",
+      "title": "德国队换人准备",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.9,
+      "importance": "low",
+      "source_event_ids": [
+        "T0021"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国球员在场边待命，走向球场准备入场"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队球员在场边待命，准备换人"
+    },
+    {
+      "event_id": "F0018",
+      "video_timestamp": "00:44:58",
+      "timestamp": "00:44:58",
+      "match_time": "36:48",
+      "period": "first_half",
+      "match_minute": 36,
+      "stoppage_minute": 48,
+      "match_time_source": "scoreboard",
+      "event_type": "corner",
+      "title": "德国队获得角球机会",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.95,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0022"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队球员在角旗区准备发角球，裁判在场边监督"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队获得角球机会，球员头球破门"
+    },
+    {
+      "event_id": "F0019",
+      "video_timestamp": "00:45:44",
+      "timestamp": "00:45:44",
+      "match_time": "37:34",
+      "period": "first_half",
+      "match_minute": 37,
+      "stoppage_minute": 34,
+      "match_time_source": "scoreboard",
+      "event_type": "goal",
+      "title": "德国队头球破门",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.95,
+      "importance": "high",
+      "source_event_ids": [
+        "T0023"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队角球进攻，头球攻门越过防守方进入球门，比分2-1"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队角球进攻，头球破门扩大优势"
+    },
+    {
+      "event_id": "F0020",
+      "video_timestamp": "00:46:00",
+      "timestamp": "00:46:00",
+      "match_time": "37:50",
+      "period": "first_half",
+      "match_minute": 37,
+      "stoppage_minute": 50,
+      "match_time_source": "scoreboard",
+      "event_type": "celebration",
+      "title": "德国队进球庆祝",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.95,
+      "importance": "low",
+      "source_event_ids": [
+        "T0024"
+      ],
+      "linked_event_id": "F0019",
+      "evidence": [
+        "德国队球迷看台欢呼庆祝，比分牌显示德国2-1领先"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队进球后球迷和球员热烈庆祝"
+    },
+    {
+      "event_id": "F0021",
+      "video_timestamp": "00:49:00",
+      "timestamp": "00:49:00",
+      "match_time": "40:50",
+      "period": "first_half",
+      "match_minute": 40,
+      "stoppage_minute": 0,
+      "match_time_source": "scoreboard",
+      "event_type": "goal",
+      "title": "德国队头球破门，比分变为2-1",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.85,
+      "importance": "high",
+      "source_event_ids": [
+        "T0025"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队球员禁区内头球攻门，库拉索防守方未能扑救，球入网"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队头球破门，扩大领先优势"
+    },
+    {
+      "event_id": "F0022",
+      "video_timestamp": "00:51:24",
+      "timestamp": "00:51:24",
+      "match_time": "43:14",
+      "period": "first_half",
+      "match_minute": 43,
+      "stoppage_minute": 0,
+      "match_time_source": "scoreboard",
+      "event_type": "corner",
+      "title": "德国队获得角球机会",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.95,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0026"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队球员站在角球区，手持足球准备发角球"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队获得角球机会，禁区内混战"
+    },
+    {
+      "event_id": "F0023",
+      "video_timestamp": "00:54:28",
+      "timestamp": "00:54:28",
+      "match_time": "46:18",
+      "period": "first_half",
+      "match_minute": 46,
+      "stoppage_minute": 0,
+      "match_time_source": "scoreboard",
+      "event_type": "shot_chance",
+      "title": "库拉索队射门被德国防守方扑出",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.9,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0028"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "库拉索球员禁区弧顶射门，德国防守方飞身扑救成功"
+      ],
+      "needs_more_review": false,
+      "script_angle": "库拉索队射门被德国防守方成功化解"
+    },
+    {
+      "event_id": "F0024",
+      "video_timestamp": "00:55:18",
+      "timestamp": "00:55:18",
+      "match_time": "47:08",
+      "period": "first_half",
+      "match_minute": 47,
+      "stoppage_minute": 0,
+      "match_time_source": "scoreboard",
+      "event_type": "penalty",
+      "title": "德国队获得点球机会",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.9,
+      "importance": "high",
+      "source_event_ids": [
+        "T0029"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队球员在禁区内被铲倒倒地，裁判指向点球点"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队获得点球机会，裁判指向点球点"
+    },
+    {
+      "event_id": "F0025",
+      "video_timestamp": "00:56:26",
+      "timestamp": "00:56:26",
+      "match_time": "48:50",
+      "period": "first_half",
+      "match_minute": 48,
+      "stoppage_minute": 0,
+      "match_time_source": "scoreboard",
+      "event_type": "free_kick",
+      "title": "德国队获得前场任意球机会",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.9,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0030"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队球员在禁区前持球，准备主罚任意球"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队获得前场任意球机会，球员准备主罚"
+    },
+    {
+      "event_id": "F0026",
+      "video_timestamp": "00:57:22",
+      "timestamp": "00:57:22",
+      "match_time": "49:12",
+      "period": "first_half",
+      "match_minute": 49,
+      "stoppage_minute": 0,
+      "match_time_source": "scoreboard",
+      "event_type": "goal",
+      "title": "德国队任意球破门，比分变为3-1",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.95,
+      "importance": "high",
+      "source_event_ids": [
+        "T0031"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队球员禁区前沿任意球主罚，皮球入网，比分3-1"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队任意球破门，扩大领先优势"
+    },
+    {
+      "event_id": "F0027",
+      "video_timestamp": "00:57:24",
+      "timestamp": "00:57:24",
+      "match_time": "49:14",
+      "period": "first_half",
+      "match_minute": 49,
+      "stoppage_minute": 0,
+      "match_time_source": "scoreboard",
+      "event_type": "celebration",
+      "title": "德国队庆祝进球",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.9,
+      "importance": "low",
+      "source_event_ids": [
+        "T0032"
+      ],
+      "linked_event_id": "F0026",
+      "evidence": [
+        "德国队庆祝进球，球迷欢呼，比分3-1"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队庆祝进球，球迷欢呼"
+    },
+    {
+      "event_id": "F0028",
+      "video_timestamp": "00:59:54",
+      "timestamp": "00:59:54",
+      "match_time": "45:11",
+      "period": "first_half",
+      "match_minute": 45,
+      "stoppage_minute": 11,
+      "match_time_source": "scoreboard",
+      "event_type": "substitution",
+      "title": "库拉索队换人",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.95,
+      "importance": "low",
+      "source_event_ids": [
+        "T0033"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "第四官员举起电子换人牌，换下球员，换上球员"
+      ],
+      "needs_more_review": false,
+      "script_angle": "库拉索队半场换人调整"
+    },
+    {
+      "event_id": "F0029",
+      "video_timestamp": "01:00:00",
+      "timestamp": "01:00:00",
+      "match_time": "45:11",
+      "period": "first_half",
+      "match_minute": 45,
+      "stoppage_minute": 11,
+      "match_time_source": "scoreboard",
+      "event_type": "substitution",
+      "title": "库拉索队半场换人",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "low",
+      "source_event_ids": [
+        "T0034"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "第四官员在场边高举换人牌，库拉索队球员换人"
+      ],
+      "needs_more_review": false,
+      "script_angle": "库拉索队半场换人调整"
+    },
+    {
+      "event_id": "F0030",
+      "video_timestamp": "01:01:46",
+      "timestamp": "01:01:46",
+      "match_time": "46:08",
+      "period": "second_half",
+      "match_minute": 46,
+      "stoppage_minute": 8,
+      "match_time_source": "scoreboard",
+      "event_type": "goal",
+      "title": "德国队进球，比分变为4-1",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "high",
+      "source_event_ids": [
+        "T0035"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队球员禁区内射门，库拉索防守方扑救失败，球入网，比分4-1"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队进球扩大比分至4-1"
+    },
+    {
+      "event_id": "F0031",
+      "video_timestamp": "01:02:00",
+      "timestamp": "01:02:00",
+      "match_time": "46:16",
+      "period": "second_half",
+      "match_minute": 46,
+      "stoppage_minute": 16,
+      "match_time_source": "scoreboard",
+      "event_type": "celebration",
+      "title": "德国队进球庆祝",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "low",
+      "source_event_ids": [
+        "T0036"
+      ],
+      "linked_event_id": "F0030",
+      "evidence": [
+        "德国队球员和球迷庆祝进球，气氛热烈"
+      ],
+      "needs_more_review": false,
+      "script_angle": "进球后德国队球员和球迷热烈庆祝"
+    },
+    {
+      "event_id": "F0032",
+      "video_timestamp": "01:05:00",
+      "timestamp": "01:05:00",
+      "match_time": "49:24",
+      "period": "second_half",
+      "match_minute": 49,
+      "stoppage_minute": 24,
+      "match_time_source": "scoreboard",
+      "event_type": "free_kick",
+      "title": "德国队前场任意球",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0037"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队在前场右侧获得任意球机会，双方球员排好防守和进攻人墙"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队获得前场任意球机会，准备主罚"
+    },
+    {
+      "event_id": "F0033",
+      "video_timestamp": "01:06:06",
+      "timestamp": "01:06:06",
+      "match_time": "50:28",
+      "period": "second_half",
+      "match_minute": 50,
+      "stoppage_minute": 28,
+      "match_time_source": "scoreboard",
+      "event_type": "goal",
+      "title": "德国队进球，比分变为5-1",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "high",
+      "source_event_ids": [
+        "T0038"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "球进入球门，德国队球员庆祝进球，比分5-1"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队再下一城，5-1领先"
+    },
+    {
+      "event_id": "F0034",
+      "video_timestamp": "01:07:54",
+      "timestamp": "01:07:54",
+      "match_time": "52:16",
+      "period": "second_half",
+      "match_minute": 52,
+      "stoppage_minute": 16,
+      "match_time_source": "scoreboard",
+      "event_type": "foul_card_dispute",
+      "title": "裁判判罚德国队犯规",
+      "certainty": "confirmed",
+      "evidence_level": "text_probable",
+      "confidence": 0.85,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0039"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "裁判特写镜头伸出手指指向德国队方向，示意判罚"
+      ],
+      "needs_more_review": false,
+      "script_angle": "裁判指向德国队方向，疑似判罚德国队犯规"
+    },
+    {
+      "event_id": "F0035",
+      "video_timestamp": "01:11:52",
+      "timestamp": "01:11:52",
+      "match_time": "56:14",
+      "period": "second_half",
+      "match_minute": 56,
+      "stoppage_minute": 14,
+      "match_time_source": "scoreboard",
+      "event_type": "foul_card_dispute",
+      "title": "德国队球员被铲倒",
+      "certainty": "confirmed",
+      "evidence_level": "text_probable",
+      "confidence": 0.8,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0040"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队球员在禁区前沿被库拉索球员铲倒，倒地不起"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队球员在禁区前沿被铲倒，裁判介入"
+    },
+    {
+      "event_id": "F0036",
+      "video_timestamp": "01:12:00",
+      "timestamp": "01:12:00",
+      "match_time": "47'",
+      "period": "second_half",
+      "match_minute": 47,
+      "stoppage_minute": 0,
+      "match_time_source": "subtitle",
+      "event_type": "celebration",
+      "title": "德国队进球后庆祝",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "low",
+      "source_event_ids": [
+        "T0041"
+      ],
+      "linked_event_id": "F0030",
+      "evidence": [
+        "德国队球员倒地庆祝，双手抱膝，埋入草地"
+      ],
+      "needs_more_review": false,
+      "script_angle": "球员进球后倒地庆祝，德国队士气高涨"
+    },
+    {
+      "event_id": "F0037",
+      "video_timestamp": "01:12:00",
+      "timestamp": "01:12:00",
+      "match_time": "47'",
+      "period": "second_half",
+      "match_minute": 47,
+      "stoppage_minute": 0,
+      "match_time_source": "subtitle",
+      "event_type": "goal",
+      "title": "德国队进球，比分变为4-1",
+      "certainty": "not_visible_in_window",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "high",
+      "source_event_ids": [
+        "T0042"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队球员庆祝，比分牌显示德国4-1领先，进球信息条确认"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队进球扩大领先优势"
+    },
+    {
+      "event_id": "F0038",
+      "video_timestamp": "01:17:28",
+      "timestamp": "01:17:28",
+      "match_time": "61:50",
+      "period": "second_half",
+      "match_minute": 61,
+      "stoppage_minute": 50,
+      "match_time_source": "scoreboard",
+      "event_type": "goal",
+      "title": "库拉索队任意球直接破门",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "high",
+      "source_event_ids": [
+        "T0043"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "库拉索球员主罚任意球，球直接飞入球门，德国防守方扑救未果"
+      ],
+      "needs_more_review": false,
+      "script_angle": "库拉索队利用任意球直接破门，缩小比分差距"
+    },
+    {
+      "event_id": "F0039",
+      "video_timestamp": "01:17:30",
+      "timestamp": "01:17:30",
+      "match_time": "61:52",
+      "period": "second_half",
+      "match_minute": 61,
+      "stoppage_minute": 52,
+      "match_time_source": "scoreboard",
+      "event_type": "celebration",
+      "title": "库拉索队进球后庆祝",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "low",
+      "source_event_ids": [
+        "T0044"
+      ],
+      "linked_event_id": "F0038",
+      "evidence": [
+        "库拉索球员在球门附近跑动庆祝，德国球员表现失望"
+      ],
+      "needs_more_review": false,
+      "script_angle": "库拉索队球员庆祝进球，士气大振"
+    },
+    {
+      "event_id": "F0040",
+      "video_timestamp": "01:18:38",
+      "timestamp": "01:18:38",
+      "match_time": "62:00",
+      "period": "second_half",
+      "match_minute": 62,
+      "stoppage_minute": 0,
+      "match_time_source": "estimated",
+      "event_type": "goal",
+      "title": "德国队进球",
+      "certainty": "confirmed",
+      "evidence_level": "text_probable",
+      "confidence": 0.85,
+      "importance": "high",
+      "source_event_ids": [
+        "T0045"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "回放显示德国队球员禁区内射门，球从库拉索防守方身侧入网"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队进球扩大领先优势"
+    },
+    {
+      "event_id": "F0041",
+      "video_timestamp": "01:19:06",
+      "timestamp": "01:19:06",
+      "match_time": "63:00",
+      "period": "second_half",
+      "match_minute": 63,
+      "stoppage_minute": 0,
+      "match_time_source": "estimated",
+      "event_type": "substitution",
+      "title": "德国队换人",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "low",
+      "source_event_ids": [
+        "T0046"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队进行换人，球员被替换下场"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队进行换人调整"
+    },
+    {
+      "event_id": "F0042",
+      "video_timestamp": "01:19:36",
+      "timestamp": "01:19:36",
+      "match_time": "63:30",
+      "period": "second_half",
+      "match_minute": 63,
+      "stoppage_minute": 30,
+      "match_time_source": "estimated",
+      "event_type": "substitution",
+      "title": "库拉索队换人",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "low",
+      "source_event_ids": [
+        "T0047"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "库拉索队进行换人，球员被替换下场"
+      ],
+      "needs_more_review": false,
+      "script_angle": "库拉索队进行换人调整"
+    },
+    {
+      "event_id": "F0043",
+      "video_timestamp": "01:21:00",
+      "timestamp": "01:21:00",
+      "match_time": "65:00",
+      "period": "second_half",
+      "match_minute": 65,
+      "stoppage_minute": 0,
+      "match_time_source": "estimated",
+      "event_type": "foul_card_dispute",
+      "title": "库拉索球员因伤倒地",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.9,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0048"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "库拉索球员L. 球员因伤倒地，裁判介入"
+      ],
+      "needs_more_review": false,
+      "script_angle": "库拉索球员因伤倒地，裁判介入处理"
+    },
+    {
+      "event_id": "F0044",
+      "video_timestamp": "01:21:42",
+      "timestamp": "01:21:42",
+      "match_time": "65:42",
+      "period": "second_half",
+      "match_minute": 65,
+      "stoppage_minute": 42,
+      "match_time_source": "estimated",
+      "event_type": "shot_chance",
+      "title": "库拉索队任意球射门被扑出",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.9,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0049"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "库拉索队任意球射门，德国防守方扑救成功，错失良机"
+      ],
+      "needs_more_review": false,
+      "script_angle": "库拉索队任意球射门被德国防守方扑出，错失良机"
+    },
+    {
+      "event_id": "F0045",
+      "video_timestamp": "01:23:22",
+      "timestamp": "01:23:22",
+      "match_time": "67:22",
+      "period": "second_half",
+      "match_minute": 67,
+      "stoppage_minute": 22,
+      "match_time_source": "scoreboard",
+      "event_type": "goal",
+      "title": "德国队球员进球",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.95,
+      "importance": "high",
+      "source_event_ids": [
+        "T0050"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队球员禁区内射门，球进入球门，防守方倒地"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队球员进球，扩大领先优势"
+    },
+    {
+      "event_id": "F0046",
+      "video_timestamp": "01:23:32",
+      "timestamp": "01:23:32",
+      "match_time": "67:32",
+      "period": "second_half",
+      "match_minute": 67,
+      "stoppage_minute": 32,
+      "match_time_source": "scoreboard",
+      "event_type": "celebration",
+      "title": "德国队进球后庆祝",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.9,
+      "importance": "low",
+      "source_event_ids": [
+        "T0051"
+      ],
+      "linked_event_id": "F0045",
+      "evidence": [
+        "德国队球员拥抱庆祝，球员奔跑庆祝"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队球员庆祝进球，士气高涨"
+    },
+    {
+      "event_id": "F0047",
+      "video_timestamp": "01:24:04",
+      "timestamp": "01:24:04",
+      "match_time": "71:24",
+      "period": "second_half",
+      "match_minute": 71,
+      "stoppage_minute": 24,
+      "match_time_source": "scoreboard",
+      "event_type": "goal",
+      "title": "德国队进球，比分变为6-1",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "high",
+      "source_event_ids": [
+        "T0052"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队球员禁区内射门，球入网，VAR确认越位不成立，进球有效"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队进球，VAR确认越位不成立，进球有效"
+    },
+    {
+      "event_id": "F0048",
+      "video_timestamp": "01:26:44",
+      "timestamp": "01:26:44",
+      "match_time": "72:18",
+      "period": "second_half",
+      "match_minute": 72,
+      "stoppage_minute": 18,
+      "match_time_source": "scoreboard",
+      "event_type": "substitution",
+      "title": "德国队换人",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "low",
+      "source_event_ids": [
+        "T0053"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "第四官员举起电子换人板，球员下场，球员上场"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队进行换人，新球员与队友击掌庆祝"
+    },
+    {
+      "event_id": "F0049",
+      "video_timestamp": "01:27:02",
+      "timestamp": "01:27:02",
+      "match_time": "72:36",
+      "period": "second_half",
+      "match_minute": 72,
+      "stoppage_minute": 36,
+      "match_time_source": "scoreboard",
+      "event_type": "substitution",
+      "title": "德国队换人",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.9,
+      "importance": "low",
+      "source_event_ids": [
+        "T0054"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "屏幕左下角出现换人信息，球员下场，球员上场"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队进行换人，换人信息清晰显示"
+    },
+    {
+      "event_id": "F0050",
+      "video_timestamp": "01:35:36",
+      "timestamp": "01:35:36",
+      "match_time": "81:10",
+      "period": "second_half",
+      "match_minute": 81,
+      "stoppage_minute": 10,
+      "match_time_source": "scoreboard",
+      "event_type": "free_kick",
+      "title": "德国队在禁区附近获得任意球",
+      "certainty": "confirmed",
+      "evidence_level": "text_probable",
+      "confidence": 0.8,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0055"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "双方球员在禁区附近准备执行任意球，裁判在场边观察"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队在禁区附近获得任意球，双方球员准备争抢"
+    },
+    {
+      "event_id": "F0051",
+      "video_timestamp": "01:36:00",
+      "timestamp": "01:36:00",
+      "match_time": "81:34",
+      "period": "second_half",
+      "match_minute": 81,
+      "stoppage_minute": 34,
+      "match_time_source": "scoreboard",
+      "event_type": "corner",
+      "title": "德国队获得角球机会",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.9,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0056"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队在前场右侧角球区准备开角球，库拉索球员在禁区内防守"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队获得角球机会，库拉索球员在禁区内防守"
+    },
+    {
+      "event_id": "F0052",
+      "video_timestamp": "01:36:20",
+      "timestamp": "01:36:20",
+      "match_time": "81:54",
+      "period": "second_half",
+      "match_minute": 81,
+      "stoppage_minute": 54,
+      "match_time_source": "scoreboard",
+      "event_type": "substitution",
+      "title": "库拉索队进行换人",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.9,
+      "importance": "low",
+      "source_event_ids": [
+        "T0057"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "裁判举起换人牌，换下球员，换上球员"
+      ],
+      "needs_more_review": false,
+      "script_angle": "库拉索队进行换人，换下球员，换上球员"
+    },
+    {
+      "event_id": "F0053",
+      "video_timestamp": "01:36:56",
+      "timestamp": "01:36:56",
+      "match_time": "82:30",
+      "period": "second_half",
+      "match_minute": 82,
+      "stoppage_minute": 30,
+      "match_time_source": "scoreboard",
+      "event_type": "celebration",
+      "title": "德国队球员庆祝",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.9,
+      "importance": "low",
+      "source_event_ids": [
+        "T0058"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国队球员与队友拥抱庆祝，背景可见观众席"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队球员庆祝"
+    },
+    {
+      "event_id": "F0054",
+      "video_timestamp": "01:37:04",
+      "timestamp": "01:37:04",
+      "match_time": "82:38",
+      "period": "second_half",
+      "match_minute": 82,
+      "stoppage_minute": 38,
+      "match_time_source": "scoreboard",
+      "event_type": "substitution",
+      "title": "德国队进行换人",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "low",
+      "source_event_ids": [
+        "T0059"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "屏幕左下角出现换人字幕条，球员被换下，球员上场"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队进行换人，球员被换下，球员上场"
+    },
+    {
+      "event_id": "F0055",
+      "video_timestamp": "01:39:58",
+      "timestamp": "01:39:58",
+      "match_time": "85:34",
+      "period": "second_half",
+      "match_minute": 85,
+      "stoppage_minute": 34,
+      "match_time_source": "scoreboard",
+      "event_type": "goal",
+      "title": "德国队进球",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "high",
+      "source_event_ids": [
+        "T0060"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "屏幕底部出现进球信息字幕条，场上球员在球员区域活动"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队进球，比分变为6-1"
+    },
+    {
+      "event_id": "F0056",
+      "video_timestamp": "01:42:08",
+      "timestamp": "01:42:08",
+      "match_time": "88:00",
+      "period": "second_half",
+      "match_minute": 88,
+      "stoppage_minute": 0,
+      "match_time_source": "narrative",
+      "event_type": "goal",
+      "title": "德国队进球",
+      "certainty": "confirmed",
+      "evidence_level": "direct_visual",
+      "confidence": 0.95,
+      "importance": "high",
+      "source_event_ids": [
+        "T0061"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "德国球员在禁区内射门，库拉索防守球员倒地滑铲未能阻止，球进入球门"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队进球，比分变为7-1"
+    },
+    {
+      "event_id": "F0057",
+      "video_timestamp": "01:43:00",
+      "timestamp": "01:43:00",
+      "match_time": "88:00",
+      "period": "second_half",
+      "match_minute": 88,
+      "stoppage_minute": 0,
+      "match_time_source": "narrative",
+      "event_type": "celebration",
+      "title": "德国队庆祝进球",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "low",
+      "source_event_ids": [
+        "T0062"
+      ],
+      "linked_event_id": "F0056",
+      "evidence": [
+        "球员射门，足球越过防守方入网，球员庆祝，比分牌显示德国7-1领先"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队庆祝进球"
+    },
+    {
+      "event_id": "F0058",
+      "video_timestamp": "01:46:40",
+      "timestamp": "01:46:40",
+      "match_time": "92:14",
+      "period": "second_half",
+      "match_minute": 92,
+      "stoppage_minute": 14,
+      "match_time_source": "scoreboard",
+      "event_type": "offside",
+      "title": "越位判罚",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.9,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0063"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "边裁举起旗子示意越位犯规，德国球员对判罚表示疑问"
+      ],
+      "needs_more_review": false,
+      "script_angle": "越位判罚，边裁举旗示意"
+    },
+    {
+      "event_id": "F0059",
+      "video_timestamp": "01:48:16",
+      "timestamp": "01:48:16",
+      "match_time": "93:50",
+      "period": "second_half",
+      "match_minute": 93,
+      "stoppage_minute": 50,
+      "match_time_source": "scoreboard",
+      "event_type": "free_kick",
+      "title": "德国队获得前场任意球机会",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.9,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0064"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "场上球员正在为任意球做准备，库拉索球员在球前，德国球员排成人墙"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队获得前场任意球机会，库拉索防守方做出扑救准备动作"
+    },
+    {
+      "event_id": "F0060",
+      "video_timestamp": "01:49:22",
+      "timestamp": "01:49:22",
+      "match_time": "94:56",
+      "period": "second_half",
+      "match_minute": 94,
+      "stoppage_minute": 56,
+      "match_time_source": "scoreboard",
+      "event_type": "shot_chance",
+      "title": "库拉索防守方扑出任意球射门",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.9,
+      "importance": "medium",
+      "source_event_ids": [
+        "T0065"
+      ],
+      "linked_event_id": "F0059",
+      "evidence": [
+        "库拉索防守方扑出任意球，皮球被挡出，比分未变"
+      ],
+      "needs_more_review": false,
+      "script_angle": "德国队任意球射门被库拉索防守方成功扑出"
+    },
+    {
+      "event_id": "F0061",
+      "video_timestamp": "01:50:12",
+      "timestamp": "01:50:12",
+      "match_time": "90+5",
+      "period": "fulltime",
+      "match_minute": 90,
+      "stoppage_minute": 5,
+      "match_time_source": "subtitle",
+      "event_type": "half_full_time",
+      "title": "比赛结束，德国7-1库拉索",
+      "certainty": "confirmed",
+      "evidence_level": "text_clear",
+      "confidence": 0.95,
+      "importance": "high",
+      "source_event_ids": [
+        "T0066"
+      ],
+      "linked_event_id": "",
+      "evidence": [
+        "镜头显示球场全景，比分牌显示德国7-1库拉索，比赛结束"
+      ],
+      "needs_more_review": false,
+      "script_angle": "比赛结束，德国队7-1战胜库拉索队"
+    }
+  ],
+  "match_time_anchors": [
+    {
+      "video_timestamp": "00:09:30",
+      "match_time": "25'",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:11:00",
+      "match_time": "2'",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:14:00",
+      "match_time": "6'",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:17:00",
+      "match_time": "7'",
+      "period": "first_half",
+      "source": "estimated"
+    },
+    {
+      "video_timestamp": "00:19:00",
+      "match_time": "10'",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:20:00",
+      "match_time": "11'",
+      "period": "first_half",
+      "source": "estimated"
+    },
+    {
+      "video_timestamp": "00:23:00",
+      "match_time": "14'",
+      "period": "first_half",
+      "source": "estimated"
+    },
+    {
+      "video_timestamp": "00:29:00",
+      "match_time": "21'",
+      "period": "first_half",
+      "source": "subtitle"
+    },
+    {
+      "video_timestamp": "00:34:00",
+      "match_time": "26:42",
+      "period": "first_half",
+      "source": "narrative"
+    },
+    {
+      "video_timestamp": "00:35:00",
+      "match_time": "27:34",
+      "period": "first_half",
+      "source": "narrative"
+    },
+    {
+      "video_timestamp": "00:36:00",
+      "match_time": "27:50",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:38:00",
+      "match_time": "29:50",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:40:00",
+      "match_time": "32:06",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:41:00",
+      "match_time": "32:22",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:42:00",
+      "match_time": "32:30",
+      "period": "first_half",
+      "source": "estimated"
+    },
+    {
+      "video_timestamp": "00:44:00",
+      "match_time": "36:48",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:45:00",
+      "match_time": "37:34",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:46:00",
+      "match_time": "37:50",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:49:00",
+      "match_time": "40:50",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:51:00",
+      "match_time": "43:14",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:54:00",
+      "match_time": "46:18",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:55:00",
+      "match_time": "47:08",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:56:00",
+      "match_time": "48:50",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:57:00",
+      "match_time": "49:12",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "00:59:00",
+      "match_time": "45:11",
+      "period": "first_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:01:00",
+      "match_time": "46:08",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:05:00",
+      "match_time": "49:24",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:06:00",
+      "match_time": "50:28",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:07:00",
+      "match_time": "52:16",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:11:00",
+      "match_time": "56:14",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:12:00",
+      "match_time": "47'",
+      "period": "second_half",
+      "source": "subtitle"
+    },
+    {
+      "video_timestamp": "01:17:00",
+      "match_time": "61:50",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:18:00",
+      "match_time": "62:00",
+      "period": "second_half",
+      "source": "estimated"
+    },
+    {
+      "video_timestamp": "01:19:00",
+      "match_time": "63:00",
+      "period": "second_half",
+      "source": "estimated"
+    },
+    {
+      "video_timestamp": "01:19:00",
+      "match_time": "63:30",
+      "period": "second_half",
+      "source": "estimated"
+    },
+    {
+      "video_timestamp": "01:21:00",
+      "match_time": "65:00",
+      "period": "second_half",
+      "source": "estimated"
+    },
+    {
+      "video_timestamp": "01:21:00",
+      "match_time": "65:42",
+      "period": "second_half",
+      "source": "estimated"
+    },
+    {
+      "video_timestamp": "01:23:00",
+      "match_time": "67:22",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:24:00",
+      "match_time": "71:24",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:26:00",
+      "match_time": "72:18",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:27:00",
+      "match_time": "72:36",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:35:00",
+      "match_time": "81:10",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:36:00",
+      "match_time": "81:34",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:36:00",
+      "match_time": "81:54",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:37:00",
+      "match_time": "82:30",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:37:00",
+      "match_time": "82:38",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:40:00",
+      "match_time": "85:34",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:42:00",
+      "match_time": "88:00",
+      "period": "second_half",
+      "source": "narrative"
+    },
+    {
+      "video_timestamp": "01:46:00",
+      "match_time": "92:14",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:48:00",
+      "match_time": "93:50",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:49:00",
+      "match_time": "94:56",
+      "period": "second_half",
+      "source": "scoreboard"
+    },
+    {
+      "video_timestamp": "01:50:00",
+      "match_time": "90+5",
+      "period": "fulltime",
+      "source": "subtitle"
+    }
+  ],
+  "rejected_event_ids": [
+    "T0005",
+    "T0006"
+  ],
+  "quality_notes": "已剔除T0005（进球误判，实际为解围）和T0006（庆祝误判，实际无进球）。T0042（进球）因图片复核未直接显示进球瞬间，标记为not_visible_in_window但保留。所有事件已合并重复庆祝，删除球员姓名和号码信息。",
+  "guardrail_summary": {
+    "version": "v4",
+    "policy": "single_pass_identity_and_event_type_cleanup",
+    "source_events": 61,
+    "guarded_events": 61,
+    "dropped_events": 0,
+    "findings": 47,
+    "elapsed_seconds": 20.37
+  }
+}

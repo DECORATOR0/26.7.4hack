@@ -1,0 +1,286 @@
+{
+  "patches": [
+    {
+      "op": "replace_text",
+      "event_id": "F0002",
+      "field": "evidence",
+      "value": "德国队禁区内射门，库拉索防守方和防守球员解围，比分0-0"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0002",
+      "field": "script_angle",
+      "value": "德国队禁区内射门被库拉索防守方和防守球员化解"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0003",
+      "field": "evidence",
+      "value": "德国队球员禁区内射门，库拉索防守方扑救成功，球未入网"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0003",
+      "field": "script_angle",
+      "value": "德国队射门被库拉索防守方成功扑救"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0004",
+      "field": "evidence",
+      "value": "德国队球员禁区内射门，库拉索防守方向右扑救成功"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0004",
+      "field": "script_angle",
+      "value": "德国队射门被库拉索防守方向右扑救化解"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0005",
+      "field": "evidence",
+      "value": "德国队禁区弧顶射门，库拉索防守方飞身扑救化解"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0005",
+      "field": "title",
+      "value": "德国队射门被防守方扑出"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0005",
+      "field": "script_angle",
+      "value": "德国队禁区弧顶射门被库拉索防守方飞身扑救化解"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0008",
+      "field": "evidence",
+      "value": "德国队球员进球后庆祝，库拉索防守方倒地"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0016",
+      "field": "evidence",
+      "value": "库拉索防守方高高跃起，单手将球托出横梁，完成扑救"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0016",
+      "field": "title",
+      "value": "库拉索防守方精彩扑救"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0016",
+      "field": "script_angle",
+      "value": "德国队进攻被库拉索防守方神勇化解，球被托出横梁"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0017",
+      "field": "evidence",
+      "value": "德国球员在场边待命，走向球场准备入场"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0017",
+      "field": "script_angle",
+      "value": "德国队球员在场边待命，准备换人"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0019",
+      "field": "evidence",
+      "value": "德国队角球进攻，头球攻门越过防守方进入球门，比分2-1"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0021",
+      "field": "evidence",
+      "value": "德国队球员禁区内头球攻门，库拉索防守方未能扑救，球入网"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0023",
+      "field": "evidence",
+      "value": "库拉索球员禁区弧顶射门，德国防守方飞身扑救成功"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0023",
+      "field": "title",
+      "value": "库拉索队射门被德国防守方扑出"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0023",
+      "field": "script_angle",
+      "value": "库拉索队射门被德国防守方成功化解"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0025",
+      "field": "script_angle",
+      "value": "德国队获得前场任意球机会，球员准备主罚"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0028",
+      "field": "evidence",
+      "value": "第四官员举起电子换人牌，换下球员，换上球员"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0030",
+      "field": "evidence",
+      "value": "德国队球员禁区内射门，库拉索防守方扑救失败，球入网，比分4-1"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0036",
+      "field": "script_angle",
+      "value": "球员进球后倒地庆祝，德国队士气高涨"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0038",
+      "field": "evidence",
+      "value": "库拉索球员主罚任意球，球直接飞入球门，德国防守方扑救未果"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0040",
+      "field": "evidence",
+      "value": "回放显示德国队球员禁区内射门，球从库拉索防守方身侧入网"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0041",
+      "field": "evidence",
+      "value": "德国队进行换人，球员被替换下场"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0042",
+      "field": "evidence",
+      "value": "库拉索队进行换人，球员被替换下场"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0043",
+      "field": "evidence",
+      "value": "库拉索球员L. 球员因伤倒地，裁判介入"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0044",
+      "field": "evidence",
+      "value": "库拉索队任意球射门，德国防守方扑救成功，错失良机"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0044",
+      "field": "script_angle",
+      "value": "库拉索队任意球射门被德国防守方扑出，错失良机"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0045",
+      "field": "evidence",
+      "value": "德国队球员禁区内射门，球进入球门，防守方倒地"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0045",
+      "field": "title",
+      "value": "德国队球员进球"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0045",
+      "field": "script_angle",
+      "value": "德国队球员进球，扩大领先优势"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0046",
+      "field": "evidence",
+      "value": "德国队球员拥抱庆祝，球员奔跑庆祝"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0048",
+      "field": "evidence",
+      "value": "第四官员举起电子换人板，球员下场，球员上场"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0049",
+      "field": "evidence",
+      "value": "屏幕左下角出现换人信息，球员下场，球员上场"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0052",
+      "field": "evidence",
+      "value": "裁判举起换人牌，换下球员，换上球员"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0052",
+      "field": "script_angle",
+      "value": "库拉索队进行换人，换下球员，换上球员"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0054",
+      "field": "evidence",
+      "value": "屏幕左下角出现换人字幕条，球员被换下，球员上场"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0054",
+      "field": "script_angle",
+      "value": "德国队进行换人，球员被换下，球员上场"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0055",
+      "field": "evidence",
+      "value": "屏幕底部出现进球信息字幕条，场上球员在球员区域活动"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0057",
+      "field": "evidence",
+      "value": "球员射门，足球越过防守方入网，球员庆祝，比分牌显示德国7-1领先"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0059",
+      "field": "script_angle",
+      "value": "德国队获得前场任意球机会，库拉索防守方做出扑救准备动作"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0060",
+      "field": "evidence",
+      "value": "库拉索防守方扑出任意球，皮球被挡出，比分未变"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0060",
+      "field": "title",
+      "value": "库拉索防守方扑出任意球射门"
+    },
+    {
+      "op": "replace_text",
+      "event_id": "F0060",
+      "field": "script_angle",
+      "value": "德国队任意球射门被库拉索防守方成功扑出"
+    }
+  ]
+}

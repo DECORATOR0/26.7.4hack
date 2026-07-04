@@ -139,7 +139,7 @@ class FrameNarrationRunner:
     def _request_fingerprint(self, segment: dict[str, Any]) -> str:
         payload = {
             "stage": "frame_narration",
-            "prompt_version": "v2_team_constraint",
+            "prompt_version": "v4_ocr_score_panel",
             "max_tokens": self.options.max_tokens,
             "temperature": self.options.temperature,
             "segment": segment,
@@ -194,7 +194,7 @@ class FrameNarrationRunner:
             "ok": parse_error is None and finish_reason != "length",
             "request_fingerprint": request_fingerprint,
             "request_max_tokens": self.options.max_tokens,
-            "prompt_version": "v2_team_constraint",
+            "prompt_version": "v4_ocr_score_panel",
             "elapsed_seconds": round(time.time() - started, 3),
             "usage": response.raw.get("usage"),
             "finish_reason": finish_reason,
@@ -236,6 +236,7 @@ class FrameNarrationRunner:
 3. 攻防过程：哪一方在进攻、防守是否密集、是否在禁区/球门附近、是否形成射门或混战。
 4. 可能事件：goal_or_celebration、replay、corner、free_kick、penalty、substitution、card_scene、referee_dispute、attack_highlight、halftime、fulltime。
 5. 可见文字：比分牌、时间、球员名、字幕条、阵容/换人/进球信息。如果看不清就写 unknown。
+6. OCR/比分牌面板：遇到射门、入网、扑出、庆祝、回放、点球或任意球直接攻门时，必须先记录前后可见比分、比赛分钟、进球信息条、回放标识，再描述射门姿态和结果。
 
 约束：
 1. 不要编造球员姓名；只有画面字幕清楚出现时才可记录。
@@ -250,6 +251,7 @@ class FrameNarrationRunner:
   "start": "{segment['start']}",
   "end": "{segment['end']}",
   "segment_summary": "这一分钟的整体视觉过程概述",
+  "score_panel_summary": "本段可见比分牌/OCR/进球信息条摘要；没有则 unknown",
   "observations": [
     {{
       "frame_index": 0,
@@ -258,6 +260,7 @@ class FrameNarrationRunner:
       "description": "画面上实际看到的内容",
       "visible_text": "可见字幕/比分/球员名；没有则 unknown",
       "scoreboard": "如 1-0；看不清则 unknown",
+      "score_panel": "比赛分钟、比分变化、进球信息条、REPLAY/LIVE 标识；没有则 unknown",
       "possible_events": ["goal_or_celebration|replay|corner|free_kick|penalty|substitution|card_scene|referee_dispute|attack_highlight|halftime|fulltime"],
       "confidence": 0.0
     }}
