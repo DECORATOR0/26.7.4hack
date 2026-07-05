@@ -560,23 +560,24 @@ main {
   left: 50%;
   bottom: 18px;
   z-index: 5;
+  box-sizing: border-box;
   width: min(86%, 840px);
-  max-height: 4.8em;
+  max-height: min(34%, 132px);
   padding: 10px 16px;
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.68);
   color: #fff;
-  font-size: clamp(15px, 2vw, 22px);
+  --caption-font-size: 22px;
+  font-size: var(--caption-font-size);
   font-weight: 800;
-  line-height: 1.42;
+  line-height: 1.28;
   text-align: center;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.78);
   transform: translateX(-50%);
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
   pointer-events: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .custom-video-controls {
@@ -926,8 +927,7 @@ main {
     bottom: 12px;
     width: 90%;
     padding: 8px 10px;
-    font-size: 14px;
-    -webkit-line-clamp: 2;
+    max-height: min(38%, 96px);
   }
 
   .custom-video-controls {

@@ -146,6 +146,35 @@ function currentScript(item) {
   return normalizeSubtitleText(variantField(item, "script", item.script || "暂无解说文案。"));
 }
 
+function fitSubtitleText() {
+  if (!eventSubtitle) return;
+  if (!eventSubtitle.textContent.trim()) return;
+
+  const isMobile = window.matchMedia("(max-width: 960px)").matches;
+  const maxSize = isMobile ? 18 : 22;
+  const minSize = isMobile ? 8 : 10;
+  const lineHeightRatio = 1.28;
+
+  eventSubtitle.style.setProperty("--caption-font-size", `${maxSize}px`);
+  eventSubtitle.style.lineHeight = String(lineHeightRatio);
+
+  const maxHeight = eventSubtitle.clientHeight || Number.parseFloat(window.getComputedStyle(eventSubtitle).maxHeight) || 96;
+  for (let size = maxSize; size >= minSize; size -= 1) {
+    eventSubtitle.style.setProperty("--caption-font-size", `${size}px`);
+    const measuredStyle = window.getComputedStyle(eventSubtitle);
+    const verticalPadding = Number.parseFloat(measuredStyle.paddingTop) + Number.parseFloat(measuredStyle.paddingBottom);
+    const lineHeight = size * lineHeightRatio;
+    const fitsHeight = eventSubtitle.scrollHeight <= maxHeight + 1;
+    const fitsWidth = eventSubtitle.scrollWidth <= eventSubtitle.clientWidth + 1;
+    const lines = Math.ceil(Math.max(0, eventSubtitle.scrollHeight - verticalPadding) / lineHeight);
+    if (fitsHeight && fitsWidth && lines <= 3) {
+      return;
+    }
+  }
+
+  eventSubtitle.style.setProperty("--caption-font-size", `${minSize}px`);
+}
+
 function normalizeSubtitleText(text) {
   let value = String(text || "");
   if (!selectedLanguage.startsWith("zh")) {
@@ -493,6 +522,7 @@ function setActiveEvent(id, options = {}) {
   }
   if (eventSubtitle) {
     eventSubtitle.textContent = currentScript(item);
+    requestAnimationFrame(fitSubtitleText);
   }
   if (options.focusPlayer) {
     focusPlayer();
@@ -561,6 +591,7 @@ if (styleSelect) {
 }
 
 installVideoControls(video);
+window.addEventListener("resize", fitSubtitleText);
 for (const montageVideo of document.querySelectorAll(".montage__video")) {
   installVideoControls(montageVideo);
 }
@@ -582,5 +613,6 @@ async function init() {
 init().catch((error) => {
   if (eventSubtitle) {
     eventSubtitle.textContent = `Demo 数据加载失败：${String(error)}`;
+    requestAnimationFrame(fitSubtitleText);
   }
 });
