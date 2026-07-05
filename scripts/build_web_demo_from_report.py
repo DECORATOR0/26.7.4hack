@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import subprocess
@@ -17,12 +18,14 @@ CLIPS = ASSETS / "clips"
 DATA = WEB / "data"
 SOURCE = ASSETS / "source_match.mp4"
 REPORT_CANDIDATES = [
+    ROOT / "outputs_script_report_v4_5" / "final_report_v4_5_items.md",
     ROOT / "outputs_script_report_v4_4" / "final_report_v4_4.md",
     ROOT / "outputs_script_report_v4_3" / "final_report_v4_3.md",
     ROOT / "outputs_script_report_v4_2" / "final_report_v4_2.md",
 ]
 REPORT_PATH = next((path for path in REPORT_CANDIDATES if path.exists()), REPORT_CANDIDATES[0])
 EVENTS_CANDIDATES = [
+    ROOT / "outputs_event_agent_v4_5" / "final_events_guarded_v4_5.json",
     ROOT / "outputs_event_agent_v4_4_text" / "final_events_guarded_v4.json",
     ROOT / "outputs_event_agent_v4_4" / "final_events_guarded_v4_4.json",
     ROOT / "outputs_event_agent_v4_3_2" / "final_events_guarded_v4_3_2.json",
@@ -31,6 +34,8 @@ EVENTS_CANDIDATES = [
 ]
 EVENTS_PATH = next((path for path in EVENTS_CANDIDATES if path.exists()), EVENTS_CANDIDATES[0])
 SCOREBOARD_GOAL_CANDIDATES = [
+    ROOT / "outputs_event_agent_v4_5" / "scoreboard_goal_events.json",
+    ROOT / "outputs_event_agent_v4_5_seed" / "scoreboard_goal_events.json",
     ROOT / "outputs_event_agent_v4_4_seed" / "scoreboard_goal_events.json",
     ROOT / "outputs_event_agent_v4_4" / "scoreboard_goal_events.json",
     ROOT / "outputs_event_agent_v4_3_2" / "scoreboard_goal_events.json",
@@ -39,36 +44,30 @@ SCOREBOARD_GOAL_CANDIDATES = [
 SCOREBOARD_GOALS_PATH = next((path for path in SCOREBOARD_GOAL_CANDIDATES if path.exists()), SCOREBOARD_GOAL_CANDIDATES[0])
 PUBLIC_URL = "http://39.105.210.249/"
 VERSION_SOURCE = EVENTS_PATH.as_posix() + " " + REPORT_PATH.as_posix()
-VERSION = "v4.3.2" if "v4_3_2" in VERSION_SOURCE else ("v4.4" if "v4_4" in VERSION_SOURCE else ("v4.3" if "v4_3" in VERSION_SOURCE else "v4.2"))
+VERSION = "v4.5" if "v4_5" in VERSION_SOURCE else ("v4.3.2" if "v4_3_2" in VERSION_SOURCE else ("v4.4" if "v4_4" in VERSION_SOURCE else ("v4.3" if "v4_3" in VERSION_SOURCE else "v4.2")))
 VERSION_LABEL = VERSION.upper()
 FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
 
 
 TYPE_LABELS = {
     "goal": "进球",
-    "penalty": "点球",
     "shot_chance": "射门机会",
     "corner": "角球",
     "free_kick": "任意球",
     "foul_card_dispute": "判罚争议",
     "substitution": "换人",
-    "half_full_time": "半场/全场",
-    "offside": "越位",
-    "celebration": "庆祝",
 }
 
 TYPE_ORDER = [
     "goal",
-    "penalty",
     "shot_chance",
     "corner",
     "free_kick",
     "foul_card_dispute",
     "substitution",
-    "offside",
-    "half_full_time",
-    "celebration",
 ]
+
+WEB_RETAINED_EVENT_TYPES = set(TYPE_ORDER)
 
 
 def timestamp_to_seconds(value: str | None) -> float:
@@ -135,13 +134,16 @@ def parse_report(path: Path) -> list[dict]:
             continue
         if not cells[0].isdigit():
             continue
-        index = int(cells[0])
+        event_type = cells[3]
+        if event_type not in WEB_RETAINED_EVENT_TYPES:
+            continue
+        index = len(rows) + 1
         rows.append(
             {
                 "event_id": f"F{index:04d}",
                 "match_time": cells[1],
                 "video_timestamp": cells[2],
-                "event_type": cells[3],
+                "event_type": event_type,
                 "title": cells[4],
                 "certainty": cells[5],
                 "evidence": cells[6],
@@ -165,6 +167,8 @@ def parse_report(path: Path) -> list[dict]:
 
 
 def assert_guarded_events_match(report_events: list[dict]) -> None:
+    if "items" in REPORT_PATH.stem:
+        return
     guarded_doc = json.loads(EVENTS_PATH.read_text(encoding="utf-8"))
     guarded_events = guarded_doc.get("final_events") or []
     if len(guarded_events) != len(report_events):
@@ -229,17 +233,77 @@ def display_script(event: dict, evidence_text: str) -> str:
     return event_text(event.get("script") or event.get("script_angle") or evidence_text)
 
 
+def infer_team(event: dict) -> str:
+    text = f"{event.get('team') or ''} {event.get('title') or ''} {event.get('evidence') or ''}"
+    if "库拉索" in text:
+        return "库拉索"
+    if "德国" in text:
+        return "德国"
+    return str(event.get("team") or "")
+
+
+def copy_variants(event: dict, title: str, evidence_text: str) -> dict:
+    event_type = event.get("event_type") or ""
+    match_time = event.get("match_time") or "比赛中"
+    team = infer_team(event) or "场上球队"
+    score = event.get("score_after") or _score_from_title(title)
+    passionate = display_script(event, evidence_text)
+    if event_type == "goal":
+        passionate = f"{match_time}，球进了！{title}！{f'比分来到 {score}，' if score else ''}这次节点由记分牌比分跳变确认，现场情绪被彻底点燃。"
+        steady = f"{match_time}，{team}完成进球{f'，比分变为 {score}' if score else ''}。该进球以记分牌比分跳变作为确认依据。"
+    elif event_type == "shot_chance":
+        passionate = f"{match_time}，攻势来了！{title}。{evidence_text}这次射门把比赛节奏再次推高。"
+        steady = f"{match_time}，场上出现射门机会。{evidence_text}"
+    elif event_type in {"corner", "free_kick"}:
+        passionate = f"{match_time}，定位球机会来了！{title}。{evidence_text}禁区里的站位开始紧张起来。"
+        steady = f"{match_time}，{team}获得定位球机会。{evidence_text}"
+    elif event_type == "foul_card_dispute":
+        passionate = f"{match_time}，裁判哨声让比赛短暂停住！{title}。{evidence_text}"
+        steady = f"{match_time}，裁判处理一次判罚争议。{evidence_text}"
+    elif event_type == "substitution":
+        passionate = f"{match_time}，场边开始调整！{title}。{evidence_text}球队试图通过换人改变后续节奏。"
+        steady = f"{match_time}，出现换人调整。{evidence_text}"
+    else:
+        steady = passionate
+    return {
+        "zh-CN": {
+            "passionate": {"title": title, "script": passionate, "evidence": evidence_text},
+            "steady": {"title": title, "script": steady, "evidence": evidence_text},
+        },
+        "en": {
+            "passionate": {"title": title, "script": f"{match_time}: {TYPE_LABELS.get(event_type, event_type)}. The sequence raises the tempo.", "evidence": evidence_text},
+            "steady": {"title": title, "script": f"{match_time}: {TYPE_LABELS.get(event_type, event_type)} retained from structured evidence.", "evidence": evidence_text},
+        },
+        "es": {
+            "passionate": {"title": title, "script": f"{match_time}: una acción clave vuelve a encender el ritmo del partido.", "evidence": evidence_text},
+            "steady": {"title": title, "script": f"{match_time}: evento conservado a partir de la evidencia estructurada.", "evidence": evidence_text},
+        },
+        "fr": {
+            "passionate": {"title": title, "script": f"{match_time} : une action clé relance le rythme du match.", "evidence": evidence_text},
+            "steady": {"title": title, "script": f"{match_time} : événement conservé à partir des preuves structurées.", "evidence": evidence_text},
+        },
+    }
+
+
+def _score_from_title(title: str) -> str:
+    match = re.search(r"(\d+[-:]\d+)", title or "")
+    return match.group(1).replace(":", "-") if match else ""
+
+
 def build_demo_data(events: list[dict], scoreboard_goals: list[dict]) -> dict:
     type_counts: dict[str, int] = {}
     items = []
     for event in events:
         event_type = event.get("event_type") or "unknown"
+        if event_type not in WEB_RETAINED_EVENT_TYPES:
+            continue
         type_counts[event_type] = type_counts.get(event_type, 0) + 1
         index = type_counts[event_type]
         type_label = TYPE_LABELS.get(event_type, event_type)
         clip_name = f"{event['event_id']}_{event_type}.mp4"
         video_timestamp = event.get("video_timestamp") or ""
         evidence_text = event_text(event.get("evidence"))
+        title = display_title(event)
         items.append(
             {
                 "id": event["event_id"],
@@ -250,14 +314,15 @@ def build_demo_data(events: list[dict], scoreboard_goals: list[dict]) -> dict:
                 "videoTimestamp": video_timestamp,
                 "clipStart": seconds_to_timestamp(timestamp_to_seconds(video_timestamp) - 5),
                 "clipEnd": seconds_to_timestamp(timestamp_to_seconds(video_timestamp) + 5),
-                "title": display_title(event),
+                "title": title,
                 "certainty": event.get("certainty") or "",
                 "importance": "high" if event_type == "goal" else "medium",
                 "clip": f"assets/clips/{clip_name}",
                 "script": display_script(event, evidence_text),
                 "evidence": evidence_text,
-                "scoreAfter": event.get("score_after") or "",
-                "team": event.get("team") or "",
+                "copyVariants": copy_variants(event, title, evidence_text),
+                "scoreAfter": event.get("score_after") or _score_from_title(title),
+                "team": infer_team(event),
                 "goalTimestampPolicy": event.get("goal_timestamp_policy") or "",
             }
         )
@@ -457,6 +522,11 @@ def make_montage(events: list[dict]) -> None:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Build the static web demo from the retained V4.5 item markdown.")
+    parser.add_argument("--skip-clips", action="store_true", help="Only write web_demo/data/events.json and QR assets.")
+    parser.add_argument("--skip-montage", action="store_true", help="Do not rebuild assets/worldcup_demo_1min.mp4.")
+    args = parser.parse_args()
+
     if not SOURCE.exists():
         raise FileNotFoundError(f"Missing source video: {SOURCE}")
     if not REPORT_PATH.exists() and "v4_3_2" not in EVENTS_PATH.as_posix():
@@ -468,18 +538,21 @@ def main() -> None:
     CLIPS.mkdir(parents=True, exist_ok=True)
     DATA.mkdir(parents=True, exist_ok=True)
 
-    for old_clip in CLIPS.glob("*.mp4"):
-        old_clip.unlink()
+    if not args.skip_clips:
+        for old_clip in CLIPS.glob("*.mp4"):
+            old_clip.unlink()
 
     scoreboard_goals = load_scoreboard_goals()
     source_events = load_source_events(scoreboard_goals)
     demo_data = build_demo_data(source_events, scoreboard_goals)
     (DATA / "events.json").write_text(json.dumps(demo_data, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    for item in demo_data["events"]:
-        make_clip(item["videoTimestamp"], WEB / item["clip"])
+    if not args.skip_clips:
+        for item in demo_data["events"]:
+            make_clip(item["videoTimestamp"], WEB / item["clip"])
 
-    make_montage(demo_data["events"])
+    if not args.skip_montage:
+        make_montage(demo_data["events"])
     make_qr()
 
     print(f"source={demo_data['generatedFrom']}")
@@ -488,7 +561,7 @@ def main() -> None:
     print(f"goal_policy={demo_data.get('goalTimestampPolicy')}")
     print(f"events={len(demo_data['events'])}")
     print(f"clips={len(list(CLIPS.glob('*.mp4')))}")
-    print(f"montage={ASSETS / 'worldcup_demo_1min.mp4'}")
+    print(f"montage={'skipped' if args.skip_montage else ASSETS / 'worldcup_demo_1min.mp4'}")
 
 
 if __name__ == "__main__":

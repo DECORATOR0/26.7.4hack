@@ -45,17 +45,18 @@ class ScriptReportRunner:
             }
             suffix = suffix_map[self.options.report_version]
             split_items = suffix in {"v4_5", "v4_6"}
+            report_events = _v4_5_downstream_events(events) if suffix == "v4_5" else events
             if split_items:
-                items_markdown = _v4_3_items_markdown(events, table_time_precision="10s")
+                items_markdown = _v4_3_items_markdown(report_events, table_time_precision="10s")
                 write_text(self.out_dir / f"final_report_{suffix}_items.md", items_markdown)
             markdown = _v4_3_markdown(
-                events,
+                report_events,
                 match_info,
                 suffix,
                 include_front_sections=not split_items,
             )
             write_text(self.out_dir / f"final_report_{suffix}.md", markdown)
-            write_json(self.out_dir / "script_report_runtime_summary.json", self._summary(None, events, markdown))
+            write_json(self.out_dir / "script_report_runtime_summary.json", self._summary(None, report_events, markdown))
             return self.out_dir
 
         if self.options.no_model:
@@ -611,6 +612,36 @@ def _v4_events_related(group_events: list[dict[str, Any]], event: dict[str, Any]
     return False
 
 
+V4_5_DOWNSTREAM_EVENT_TYPES = {
+    "goal",
+    "shot_chance",
+    "corner",
+    "free_kick",
+    "foul_card_dispute",
+    "substitution",
+}
+
+
+def _v4_5_downstream_events(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [event for event in events if str(event.get("event_type") or "") in V4_5_DOWNSTREAM_EVENT_TYPES]
+
+
+def _v4_5_delivery_event_groups(events: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
+    groups: list[list[dict[str, Any]]] = []
+    for event in events:
+        if _v4_3_filter_event(event) is None:
+            continue
+        if groups and (_v4_events_related(groups[-1], event) or _same_display_minute(groups[-1][-1], event)):
+            groups[-1].append(event)
+        else:
+            groups.append([event])
+    return groups
+
+
+def _same_display_minute(left: dict[str, Any], right: dict[str, Any]) -> bool:
+    return _display_minute(left) == _display_minute(right)
+
+
 def _v4_3_markdown(
     events: list[dict[str, Any]],
     match_info: dict[str, Any],
@@ -619,7 +650,7 @@ def _v4_3_markdown(
 ) -> str:
     match_name = match_info.get("match_name") or "德国 vs 库拉索"
     final_score = _v4_3_final_score(events, match_info)
-    groups = _v4_3_event_groups(events)
+    groups = _v4_5_delivery_event_groups(events) if version == "v4_5" else _v4_3_event_groups(events)
     version_label = version.upper().replace("_", ".")
     lines: list[str] = []
     if include_front_sections:
@@ -642,8 +673,9 @@ def _v4_3_markdown(
             "",
             f"- **比赛**：{match_name}",
             f"- **进球口径**：{version_label} 的进球只采纳记分牌 OCR 比分跳变，不再把回放、庆祝或进球信息条单独升格为新进球。",
-            "- **非进球事件**：角球、任意球、犯规、越位、换人等沿用现有视觉事件链路，并在输出阶段做合并和降噪。",
+            "- **非进球事件**：射门机会、角球、任意球、判罚争议、换人沿用现有视觉事件链路，并在输出阶段做合并和降噪。",
             "- **事项表用途**：最前面的事项列表面向 Web/demo 结构化消费，只有该表的比赛时间使用 10 秒粒度；后续解说文本仍按分钟叙述。",
+            "- **Web/demo 保留类型**：进球、射门机会、角球、任意球、判罚争议、换人；点球、越位、半场/全场、庆祝不进入外部事项列表。",
             "- **写作约束**：不输出具体球员姓名、号码和位置身份；技术统计只基于 Harness 保留事件，不等同官方统计。",
             "- **端到端约束**：从视频帧、OCR 记分牌和模型视觉叙述自动生成 Markdown，中间不依赖人工或强模型改写最终稿。",
             "",
@@ -676,6 +708,20 @@ def _v4_3_markdown(
                 "",
             ]
         )
+
+    if version == "v4_5":
+        lines.extend(["### 平实风格解说稿", ""])
+        for group in groups:
+            lines.extend(
+                [
+                    f"- {_v4_3_group_heading(group)}",
+                    "```text",
+                    "解说员：",
+                    f"“{_v4_5_plain_group_script(group)}”",
+                    "```",
+                    "",
+                ]
+            )
 
     lines.extend(["---", "", "## 第二部分：关键事件时间轴", ""])
     lines.extend(_v4_3_public_timeline(groups))
@@ -845,6 +891,29 @@ def _v4_3_group_script(group: list[dict[str, Any]]) -> str:
     return f"{minute}，{kinds}连续出现，比赛节奏被这一组画面推高。{details}"
 
 
+def _v4_5_plain_group_script(group: list[dict[str, Any]]) -> str:
+    if not group:
+        return "本分钟没有保留的关键事项。"
+    minute = _display_minute(group[0])
+    kinds = _v4_3_group_kind(group)
+    details = "；".join(_v4_3_description(event).rstrip("。") for event in group[:3] if _v4_3_description(event))
+    goal = next((event for event in group if event.get("event_type") == "goal"), None)
+    if goal:
+        score = f"，比分来到 {goal.get('score_after')}" if goal.get("score_after") else ""
+        return f"{minute}，{goal.get('team') or '进攻方'}完成进球{score}。{details}。这个节点由记分牌比分跳变确认。"
+    if any(event.get("event_type") == "free_kick" for event in group):
+        return f"{minute}，场上出现任意球或相关定位球机会。{details}。双方随后围绕罚球点和禁区站位重新组织。"
+    if any(event.get("event_type") == "corner" for event in group):
+        return f"{minute}，场上出现角球机会。{details}。禁区内双方准备争抢第一落点。"
+    if any(event.get("event_type") == "foul_card_dispute" for event in group):
+        return f"{minute}，裁判对身体接触或争议动作进行处理。{details}。比赛节奏短暂停顿后继续。"
+    if any(event.get("event_type") == "substitution" for event in group):
+        return f"{minute}，场边出现人员调整。{details}。球队通过换人调整后续比赛节奏。"
+    if any(event.get("event_type") == "shot_chance" for event in group):
+        return f"{minute}，场上出现射门机会。{details}。这次进攻没有改写比分，但形成了明确威胁。"
+    return f"{minute}，{kinds}出现。{details}。"
+
+
 def _v4_3_public_timeline(groups: list[list[dict[str, Any]]]) -> list[str]:
     lines = [
         "| 序号 | 时间 | 事件类型 | 涉及球队 | 事件描述 |",
@@ -983,7 +1052,7 @@ def _v4_3_highlight_script(groups: list[list[dict[str, Any]]], final_score: str,
 
 def _v4_3_stats_table(events: list[dict[str, Any]]) -> list[str]:
     teams = ["德国", "库拉索"]
-    stats = {team: {"goal": 0, "shot": 0, "corner": 0, "foul": 0, "offside": 0, "substitution": 0} for team in teams}
+    stats = {team: {"goal": 0, "shot": 0, "corner": 0, "free_kick": 0, "foul": 0, "substitution": 0} for team in teams}
     for event in events:
         text = f"{event.get('team') or ''} {event.get('title') or ''} {event.get('evidence') or ''}"
         team = "库拉索" if "库拉索" in text and "德国" not in str(event.get("team") or "") else "德国" if "德国" in text else None
@@ -997,10 +1066,10 @@ def _v4_3_stats_table(events: list[dict[str, Any]]) -> list[str]:
             stats[team]["shot"] += 1
         elif event_type == "corner":
             stats[team]["corner"] += 1
+        elif event_type == "free_kick":
+            stats[team]["free_kick"] += 1
         elif event_type == "foul_card_dispute":
             stats[team]["foul"] += 1
-        elif event_type == "offside":
-            stats[team]["offside"] += 1
         elif event_type == "substitution":
             stats[team]["substitution"] += 1
     return [
@@ -1009,8 +1078,8 @@ def _v4_3_stats_table(events: list[dict[str, Any]]) -> list[str]:
         f"| 进球 | {stats['德国']['goal']}次 | {stats['库拉索']['goal']}次 | 仅按记分牌 OCR 跳变确认 |",
         f"| 射门/机会 | {stats['德国']['shot']}次 | {stats['库拉索']['shot']}次 | 包含进球和保留的射门机会 |",
         f"| 角球 | {stats['德国']['corner']}次 | {stats['库拉索']['corner']}次 | 来自视觉事件识别 |",
+        f"| 任意球 | {stats['德国']['free_kick']}次 | {stats['库拉索']['free_kick']}次 | 来自视觉事件识别 |",
         f"| 犯规/争议 | {stats['德国']['foul']}次 | {stats['库拉索']['foul']}次 | 来自视觉事件识别 |",
-        f"| 越位 | {stats['德国']['offside']}次 | {stats['库拉索']['offside']}次 | 来自视觉事件识别 |",
         f"| 换人 | {stats['德国']['substitution']}次 | {stats['库拉索']['substitution']}次 | 来自视觉事件识别 |",
     ]
 
