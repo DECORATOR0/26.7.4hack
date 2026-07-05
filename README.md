@@ -57,6 +57,14 @@ Install dependencies:
 python -m pip install -r requirements.txt
 ```
 
+Run the full SoccerMate V4.5 pipeline from the hardcoded source video to the two delivery markdown files:
+
+```bash
+python run_soccermate_v4_5_e2e.py
+```
+
+This command reads `德国_库拉索.mp4`, uses `.env` for the Intern-S2 API key, runs missing stages or reuses completed V4.5 stage outputs, and produces OCR goals, frame narration, event extraction, guardrails, `final_report_v4_5_items.md`, `final_report_v4_5.md`, and web demo data.
+
 Regenerate the V4.5 markdown report from the retained guarded event file:
 
 ```bash
