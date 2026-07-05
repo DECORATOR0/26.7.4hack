@@ -25,6 +25,12 @@ REPORT_CANDIDATES = [
     ROOT / "outputs_script_report_v4_2" / "final_report_v4_2.md",
 ]
 REPORT_PATH = next((path for path in REPORT_CANDIDATES if path.exists()), REPORT_CANDIDATES[0])
+FULL_REPORT_CANDIDATES = [
+    ROOT / "outputs_script_report_v4_5" / "final_report_v4_5.md",
+    ROOT / "outputs_script_report_v4_4" / "final_report_v4_4.md",
+    REPORT_PATH,
+]
+FULL_REPORT_PATH = next((path for path in FULL_REPORT_CANDIDATES if path.exists()), REPORT_PATH)
 EVENTS_CANDIDATES = [
     ROOT / "outputs_event_agent_v4_5" / "final_events_guarded_v4_5.json",
     ROOT / "outputs_event_agent_v4_4_text" / "final_events_guarded_v4.json",
@@ -69,6 +75,19 @@ TYPE_ORDER = [
 ]
 
 WEB_RETAINED_EVENT_TYPES = set(TYPE_ORDER)
+INTERNAL_COMMENTARY_TERMS = (
+    "OCR",
+    "ocr",
+    "记分牌比分",
+    "比分跳变",
+    "跳变前",
+    "跳变后",
+    "比赛钟",
+    "确认依据",
+    "这个节点由",
+    "该进球以",
+    "scoreboard",
+)
 
 
 def timestamp_to_seconds(value: str | None) -> float:
@@ -123,6 +142,113 @@ def fit_text(draw: ImageDraw.ImageDraw, text: str, font: ImageFont.ImageFont, ma
     return lines
 
 
+def _strip_quote(text: str) -> str:
+    return text.strip().strip("\"“”")
+
+
+def has_internal_commentary_terms(text: str) -> bool:
+    return any(term in text for term in INTERNAL_COMMENTARY_TERMS)
+
+
+def clean_commentary_script(text: str) -> str:
+    cleaned = _strip_quote(str(text or ""))
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    cleaned = cleaned.replace("比分已经被记分牌锁定，现场气势被这一球彻底带起来。", "现场气势被这一球彻底带起来。")
+    cleaned = re.sub(r"这个节点由记分牌比分跳变确认[。.!！]?", "", cleaned)
+    cleaned = re.sub(r"该进球以记分牌比分跳变作为确认依据[。.!！]?", "", cleaned)
+    if not has_internal_commentary_terms(cleaned):
+        return cleaned
+
+    sentences = re.findall(r"[^。！？!?]+[。！？!?]?", cleaned)
+    kept = [sentence.strip() for sentence in sentences if sentence.strip() and not has_internal_commentary_terms(sentence)]
+    return "".join(kept).strip()
+
+
+def _extract_speaker_script(block: str) -> str:
+    match = re.search(r"解说员：\s*\n[“\"](?P<script>.*?)[”\"]", block, re.S)
+    if not match:
+        match = re.search(r"[“\"](?P<script>.*?)[”\"]", block, re.S)
+    return clean_commentary_script(match.group("script")) if match else ""
+
+
+def _extract_report_blocks(text: str, start_heading: str, end_heading: str, marker_pattern: str) -> list[dict]:
+    start = text.find(start_heading)
+    if start < 0:
+        return []
+    end = text.find(end_heading, start + len(start_heading)) if end_heading else -1
+    section = text[start + len(start_heading) : end if end >= 0 else len(text)]
+    blocks: list[dict] = []
+    for match in re.finditer(marker_pattern, section, re.M | re.S):
+        heading = match.group("heading").strip()
+        script = _extract_speaker_script(match.group("body"))
+        if heading and script:
+            blocks.append({"heading": heading, "script": script})
+    return blocks
+
+
+def _match_minute_number(value: str | None) -> int | None:
+    match = re.search(r"第\s*(\d+)(?:\+\d+)?\s*分", str(value or ""))
+    return int(match.group(1)) if match else None
+
+
+def _report_block_matches(event: dict, block: dict) -> bool:
+    heading = block.get("heading") or ""
+    title = display_title(event)
+    score = event.get("score_after") or _score_from_title(title)
+    if title and title in heading:
+        return True
+    if event.get("event_type") == "goal" and score and score in heading:
+        return True
+    return False
+
+
+def _map_report_blocks_to_events(events: list[dict], blocks: list[dict]) -> dict[str, str]:
+    mapped: dict[str, str] = {}
+    cursor = 0
+    for event in events:
+        matches = [idx for idx in range(cursor, len(blocks)) if _report_block_matches(event, blocks[idx])]
+        if not matches:
+            matches = [idx for idx, block in enumerate(blocks) if _report_block_matches(event, block)]
+        if not matches:
+            continue
+
+        event_minute = _match_minute_number(event.get("match_time"))
+        minute_matches = [idx for idx in matches if _match_minute_number(blocks[idx].get("heading")) == event_minute]
+        chosen = minute_matches[0] if minute_matches else matches[0]
+        mapped[event["event_id"]] = blocks[chosen]["script"]
+        cursor = chosen
+    return mapped
+
+
+def attach_full_report_scripts(events: list[dict]) -> None:
+    if not FULL_REPORT_PATH.exists() or FULL_REPORT_PATH == REPORT_PATH and "items" in REPORT_PATH.stem:
+        return
+    text = FULL_REPORT_PATH.read_text(encoding="utf-8")
+    passionate_blocks = _extract_report_blocks(
+        text,
+        "### 关键进程",
+        "### 平实风格解说稿",
+        r"^####\s+(?P<heading>.*?)\n(?P<body>.*?)(?=^####\s+|\Z)",
+    )
+    steady_blocks = _extract_report_blocks(
+        text,
+        "### 平实风格解说稿",
+        "\n---",
+        r"^-\s+(?P<heading>.*?)\n(?P<body>.*?)(?=^-\s+|\Z)",
+    )
+    passionate = _map_report_blocks_to_events(events, passionate_blocks)
+    steady = _map_report_blocks_to_events(events, steady_blocks)
+    for event in events:
+        variants: dict[str, dict] = {}
+        if passionate.get(event["event_id"]):
+            variants.setdefault("zh-CN", {})["passionate"] = passionate[event["event_id"]]
+            event["script"] = passionate[event["event_id"]]
+        if steady.get(event["event_id"]):
+            variants.setdefault("zh-CN", {})["steady"] = steady[event["event_id"]]
+        if variants:
+            event["script_variants"] = variants
+
+
 def parse_report(path: Path) -> list[dict]:
     text = path.read_text(encoding="utf-8")
     rows: list[dict] = []
@@ -164,6 +290,7 @@ def parse_report(path: Path) -> list[dict]:
 
     for idx, row in enumerate(rows):
         row["script"] = scripts[idx] if idx < len(scripts) else row["evidence"]
+    attach_full_report_scripts(rows)
     return rows
 
 
@@ -239,9 +366,12 @@ def display_title(event: dict) -> str:
 
 
 def display_script(event: dict, evidence_text: str) -> str:
-    if event.get("event_type") == "goal" and event.get("team") and event.get("score_after"):
-        return f"{event.get('team')}队进球由记分牌比分跳变确认，比分来到 {event.get('score_after')}。"
-    return event_text(event.get("script") or event.get("script_angle") or evidence_text)
+    script = clean_commentary_script(event_text(event.get("script") or event.get("script_angle") or ""))
+    if script:
+        return script
+    if event.get("event_type") == "goal":
+        return zh_goal_script(event, display_title(event), passionate=False)
+    return event_text(evidence_text)
 
 
 def infer_team(event: dict) -> str:
@@ -253,45 +383,149 @@ def infer_team(event: dict) -> str:
     return str(event.get("team") or "")
 
 
-def copy_variants(event: dict, title: str, evidence_text: str) -> dict:
+def zh_goal_script(event: dict, title: str, *, passionate: bool) -> str:
+    match_time = event.get("match_time") or "比赛中"
+    team = infer_team(event) or "进攻方"
+    score = event.get("score_after") or _score_from_title(title)
+    if passionate:
+        return f"{match_time}，漂亮！球进了！{title}！{f'比分来到 {score}，' if score else ''}现场气势被这一球彻底带起来。"
+    return f"{match_time}，{team}队完成进球{f'，比分来到 {score}' if score else ''}。比赛走势随之改变，现场节奏被这一球带起来。"
+
+
+def zh_generated_script(event: dict, title: str, *, style: str) -> str:
     event_type = event.get("event_type") or ""
     match_time = event.get("match_time") or "比赛中"
     team = infer_team(event) or "场上球队"
-    score = event.get("score_after") or _score_from_title(title)
-    passionate = display_script(event, evidence_text)
     if event_type == "goal":
-        passionate = f"{match_time}，球进了！{title}！{f'比分来到 {score}，' if score else ''}这次节点由记分牌比分跳变确认，现场情绪被彻底点燃。"
-        steady = f"{match_time}，{team}完成进球{f'，比分变为 {score}' if score else ''}。该进球以记分牌比分跳变作为确认依据。"
-    elif event_type == "shot_chance":
-        passionate = f"{match_time}，攻势来了！{title}。这次射门把比赛节奏再次推高。"
-        steady = f"{match_time}，场上出现一次射门机会，防守方完成处理。"
-    elif event_type in {"corner", "free_kick"}:
-        passionate = f"{match_time}，定位球机会来了！{title}。禁区里的站位开始紧张起来。"
-        steady = f"{match_time}，{team}获得定位球机会，双方开始重新布置站位。"
-    elif event_type == "foul_card_dispute":
-        passionate = f"{match_time}，裁判哨声让比赛短暂停住！{title}。"
-        steady = f"{match_time}，裁判处理一次判罚争议，比赛节奏短暂停顿。"
-    elif event_type == "substitution":
-        passionate = f"{match_time}，场边开始调整！{title}。球队试图通过换人改变后续节奏。"
-        steady = f"{match_time}，出现换人调整，球队为后续比赛重新安排人员。"
-    else:
-        steady = passionate
+        return zh_goal_script(event, title, passionate=style == "passionate")
+    if event_type == "shot_chance":
+        if style == "passionate":
+            return f"{match_time}，攻势来了！{title}。这次射门把比赛节奏再次推高。"
+        return f"{match_time}，场上出现一次射门机会，防守方完成处理。"
+    if event_type in {"corner", "free_kick"}:
+        if style == "passionate":
+            return f"{match_time}，定位球机会来了！{title}。禁区里的站位开始紧张起来。"
+        return f"{match_time}，{team}获得定位球机会，双方开始重新布置站位。"
+    if event_type == "foul_card_dispute":
+        if style == "passionate":
+            return f"{match_time}，裁判哨声让比赛短暂停住！{title}。"
+        return f"{match_time}，裁判处理一次判罚争议，比赛节奏短暂停顿。"
+    if event_type == "substitution":
+        if style == "passionate":
+            return f"{match_time}，场边开始调整！{title}。球队试图通过换人改变后续节奏。"
+        return f"{match_time}，出现换人调整，球队为后续比赛重新安排人员。"
+    return event_text(event.get("script") or title)
+
+
+def localized_match_time(value: str | None, lang: str) -> str:
+    text = str(value or "")
+    match = re.search(r"第\s*(\d+)(?:\+\d+)?\s*分(?:钟)?(?:(\d+)\s*秒)?", text)
+    if not match:
+        return text if lang == "zh-CN" else text.replace("第", "").replace("分", ":").replace("秒", "")
+    minute = int(match.group(1))
+    second = match.group(2)
+    if lang == "zh-CN":
+        return text
+    if second is not None:
+        return f"{minute}:{int(second):02d}"
+    return f"{minute}'"
+
+
+def localized_team_name(team: str, lang: str) -> str:
+    normalized = team or ""
+    names = {
+        "en": {"德国": "Germany", "库拉索": "Curacao", "": "the attacking side"},
+        "es": {"德国": "Alemania", "库拉索": "Curazao", "": "el equipo atacante"},
+        "fr": {"德国": "l'Allemagne", "库拉索": "Curaçao", "": "l'équipe en attaque"},
+    }
+    if lang == "zh-CN":
+        return normalized or "进攻方"
+    table = names.get(lang, names["en"])
+    for key, value in table.items():
+        if key and key in normalized:
+            return value
+    return table[""]
+
+
+def localized_script(event: dict, title: str, lang: str, style: str) -> str:
+    event_type = event.get("event_type") or ""
+    time = localized_match_time(event.get("match_time"), lang)
+    team = localized_team_name(infer_team(event), lang)
+    score = event.get("score_after") or _score_from_title(title)
+    lively = style == "passionate"
+
+    if lang == "en":
+        if event_type == "goal":
+            return f"{time} - Goal! {team} make it {score}, and the match bursts back into life." if lively else f"{time} - {team} score{f' to make it {score}' if score else ''}. The rhythm changes immediately."
+        if event_type == "shot_chance":
+            return f"{time} - A shooting chance opens for {team}; the defense has to react." if lively else f"{time} - {team} create a shooting chance, but the defense deals with it."
+        if event_type == "corner":
+            return f"{time} - Corner for {team}; the penalty area starts to fill up." if lively else f"{time} - {team} have a corner and both sides reset their positions."
+        if event_type == "free_kick":
+            return f"{time} - Free kick for {team}; this set piece can shift the momentum." if lively else f"{time} - {team} have a free-kick situation and the defensive shape resets."
+        if event_type == "foul_card_dispute":
+            return f"{time} - The referee steps in after a contested challenge, and the tempo tightens." if lively else f"{time} - The referee handles a dispute and play pauses briefly."
+        if event_type == "substitution":
+            return f"{time} - Changes on the touchline as the teams try to reshape the next phase." if lively else f"{time} - A substitution sequence appears on the touchline."
+        return f"{time} - A key passage raises the tempo."
+
+    if lang == "es":
+        if event_type == "goal":
+            return f"{time} - ¡Gol! {team} pone el {score} y el partido se enciende." if lively else f"{time} - {team} marca{f' para el {score}' if score else ''}. El ritmo cambia de inmediato."
+        if event_type == "shot_chance":
+            return f"{time} - Ocasión de tiro para {team}; la defensa tiene que responder." if lively else f"{time} - {team} genera una ocasión de tiro, pero la defensa la resuelve."
+        if event_type == "corner":
+            return f"{time} - Córner para {team}; el área empieza a cargarse." if lively else f"{time} - {team} dispone de un córner y ambos equipos se reordenan."
+        if event_type == "free_kick":
+            return f"{time} - Tiro libre para {team}; la jugada puede cambiar el impulso." if lively else f"{time} - {team} tiene una acción de tiro libre y la defensa se coloca."
+        if event_type == "foul_card_dispute":
+            return f"{time} - El árbitro interviene tras una acción discutida y sube la tensión." if lively else f"{time} - El árbitro gestiona una disputa y el juego se pausa brevemente."
+        if event_type == "substitution":
+            return f"{time} - Movimiento en la banda: llegan cambios para ajustar el tramo siguiente." if lively else f"{time} - Aparece una secuencia de sustitución en la banda."
+        return f"{time} - Una acción clave acelera el ritmo del partido."
+
+    if lang == "fr":
+        if event_type == "goal":
+            return f"{time} - But ! {team} passe à {score} et le match s'emballe." if lively else f"{time} - {team} marque{f' pour porter le score à {score}' if score else ''}. Le rythme change aussitôt."
+        if event_type == "shot_chance":
+            return f"{time} - Occasion de tir pour {team}; la défense doit réagir." if lively else f"{time} - {team} se crée une occasion de tir, mais la défense s'en sort."
+        if event_type == "corner":
+            return f"{time} - Corner pour {team}; la surface commence à se remplir." if lively else f"{time} - {team} obtient un corner et les deux blocs se replacent."
+        if event_type == "free_kick":
+            return f"{time} - Coup franc pour {team}; ce ballon arrêté peut faire basculer le rythme." if lively else f"{time} - {team} obtient un coup franc et la défense se replace."
+        if event_type == "foul_card_dispute":
+            return f"{time} - L'arbitre intervient après une action contestée, la tension monte." if lively else f"{time} - L'arbitre gère une action litigieuse et le jeu marque une pause."
+        if event_type == "substitution":
+            return f"{time} - Ça bouge sur la ligne de touche, les équipes réajustent la suite." if lively else f"{time} - Une séquence de remplacement apparaît sur la ligne de touche."
+        return f"{time} - Une séquence importante hausse le rythme du match."
+
+    return zh_generated_script(event, title, style=style)
+
+
+def copy_variants(event: dict, title: str, evidence_text: str) -> dict:
+    zh_variants = (event.get("script_variants") or {}).get("zh-CN", {})
+    passionate = clean_commentary_script(zh_variants.get("passionate") or display_script(event, evidence_text))
+    steady = clean_commentary_script(zh_variants.get("steady") or "")
+    if not passionate or has_internal_commentary_terms(passionate):
+        passionate = zh_generated_script(event, title, style="passionate")
+    if not steady or has_internal_commentary_terms(steady):
+        steady = zh_generated_script(event, title, style="steady")
     return {
         "zh-CN": {
             "passionate": {"title": title, "script": passionate, "evidence": evidence_text},
             "steady": {"title": title, "script": steady, "evidence": evidence_text},
         },
         "en": {
-            "passionate": {"title": title, "script": f"{match_time}: {TYPE_LABELS.get(event_type, event_type)}. The sequence raises the tempo.", "evidence": evidence_text},
-            "steady": {"title": title, "script": f"{match_time}: {TYPE_LABELS.get(event_type, event_type)} retained from structured evidence.", "evidence": evidence_text},
+            "passionate": {"title": title, "script": localized_script(event, title, "en", "passionate"), "evidence": evidence_text},
+            "steady": {"title": title, "script": localized_script(event, title, "en", "steady"), "evidence": evidence_text},
         },
         "es": {
-            "passionate": {"title": title, "script": f"{match_time}: una acción clave vuelve a encender el ritmo del partido.", "evidence": evidence_text},
-            "steady": {"title": title, "script": f"{match_time}: evento conservado a partir de la evidencia estructurada.", "evidence": evidence_text},
+            "passionate": {"title": title, "script": localized_script(event, title, "es", "passionate"), "evidence": evidence_text},
+            "steady": {"title": title, "script": localized_script(event, title, "es", "steady"), "evidence": evidence_text},
         },
         "fr": {
-            "passionate": {"title": title, "script": f"{match_time} : une action clé relance le rythme du match.", "evidence": evidence_text},
-            "steady": {"title": title, "script": f"{match_time} : événement conservé à partir des preuves structurées.", "evidence": evidence_text},
+            "passionate": {"title": title, "script": localized_script(event, title, "fr", "passionate"), "evidence": evidence_text},
+            "steady": {"title": title, "script": localized_script(event, title, "fr", "steady"), "evidence": evidence_text},
         },
     }
 
@@ -360,6 +594,7 @@ def build_demo_data(events: list[dict], scoreboard_goals: list[dict]) -> dict:
 
     return {
         "generatedFrom": EVENTS_PATH.relative_to(ROOT).as_posix() if "v4_3_2" in EVENTS_PATH.as_posix() else REPORT_PATH.relative_to(ROOT).as_posix(),
+        "commentaryReportFrom": FULL_REPORT_PATH.relative_to(ROOT).as_posix() if FULL_REPORT_PATH.exists() else "",
         "guardedEventsFrom": EVENTS_PATH.relative_to(ROOT).as_posix(),
         "scoreboardGoalEventsFrom": SCOREBOARD_GOALS_PATH.relative_to(ROOT).as_posix() if SCOREBOARD_GOALS_PATH.exists() else "",
         "version": VERSION,

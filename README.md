@@ -1,6 +1,6 @@
-# InternCast V4.5 Prune
+# SoccerMate V4.5 Pure
 
-This branch is the cleaned V4.5 delivery branch. It keeps the current football commentary pipeline, the V4.5 retained event outputs, the static web demo code, and the self-contained product guide. Older experiments, old version reports, and deprecated run scripts have been removed.
+This branch is the cleaned V4.5 delivery branch for SoccerMate. It keeps the current football commentary pipeline, the V4.5 retained event outputs, the static web demo code, and the self-contained product guide. Older experiments, old version reports, and deprecated run scripts have been removed.
 
 ## Public Demo
 
@@ -35,11 +35,11 @@ It excludes penalty, offside, half/full-time markers, and celebration-only event
 ## Key Paths
 
 ```text
-docs/interncast_v4_5_product_guide.md       # self-contained uploadable product guide
+docs/soccermate_v4_5_product_guide.md       # self-contained uploadable product guide
 outputs_event_agent_v4_5/                   # final V4.5 guarded events and scoreboard goals
 outputs_script_report_v4_5/                 # V4.5 items markdown and delivery markdown
 scripts/build_web_demo_from_report.py       # builds web_demo/data/events.json and optional clips
-scripts/run_version4_5_end_to_end.ps1       # prune verification runner
+scripts/run_version4_5_end_to_end.ps1       # pure verification runner
 web_demo/                                   # static web frontend
 ```
 

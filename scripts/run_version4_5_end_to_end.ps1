@@ -14,11 +14,11 @@ function Write-Status {
         stage = $Stage
         status = $Status
         updated_at = (Get-Date).ToString("o")
-        branch_profile = "prune"
+        branch_profile = "pure"
         event_input = "outputs_event_agent_v4_5\final_events_guarded_v4_5.json"
         report_output = "outputs_script_report_v4_5"
         web_data_output = "web_demo\data\events.json"
-        note = "Prune verification rebuilds deterministic V4.5 report and web data from retained V4.5 artifacts."
+        note = "Pure verification rebuilds deterministic V4.5 report and web data from retained V4.5 artifacts."
     } | ConvertTo-Json -Depth 4 | Set-Content -Encoding UTF8 -LiteralPath $StatusPath
 }
 
@@ -38,7 +38,7 @@ function Run-Step {
     Write-Status -Stage $Name -Status "done"
 }
 
-Write-Status -Stage "version4_5_prune_verify" -Status "started"
+Write-Status -Stage "version4_5_pure_verify" -Status "started"
 
 Run-Step "compile_v4_5_code" @(
     "-m", "compileall",
@@ -84,5 +84,5 @@ if (($Types -join ",") -ne ($ExpectedTypes -join ",")) {
     throw "Unexpected event types: $($Types -join ',')"
 }
 
-Write-Status -Stage "version4_5_prune_verify" -Status "done"
-Write-Output "[$((Get-Date).ToString("o"))] VERSION4.5 PRUNE VERIFY DONE"
+Write-Status -Stage "version4_5_pure_verify" -Status "done"
+Write-Output "[$((Get-Date).ToString("o"))] VERSION4.5 PURE VERIFY DONE"

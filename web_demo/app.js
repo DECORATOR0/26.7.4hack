@@ -143,7 +143,18 @@ function currentTitle(item) {
 }
 
 function currentScript(item) {
-  return variantField(item, "script", item.script || "暂无解说文案。");
+  return normalizeSubtitleText(variantField(item, "script", item.script || "暂无解说文案。"));
+}
+
+function normalizeSubtitleText(text) {
+  let value = String(text || "");
+  if (!selectedLanguage.startsWith("zh")) {
+    value = value
+      .replace(/第\s*(\d+)\s*分\s*(\d+)\s*秒/g, (_, minute, second) => `${Number(minute)}:${String(Number(second)).padStart(2, "0")}`)
+      .replace(/第\s*(\d+)\s*分钟/g, (_, minute) => `${Number(minute)}'`)
+      .replace(/第\s*(\d+)\s*分/g, (_, minute) => `${Number(minute)}'`);
+  }
+  return value;
 }
 
 function compactMatchTime(value) {

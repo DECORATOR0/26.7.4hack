@@ -361,8 +361,9 @@ final_events_guarded_v4：
 10. 严禁出现身份词：门将、守门员、前锋、后卫、中场、队长、主罚手、替补球员；用“防守方”“球员”“球队人员”这类泛称替代。
 11. 如果事项 certainty=probable 或 uncertain，文稿中用“疑似”“可能”“从画面看”等稳妥措辞。
 12. 队名固定为德国 vs 库拉索；禁止出现其他国家队名。
-13. 不要输出额外章节，不要输出制作提示、内部备注、短视频口播版。
-14. 输出必须是最终可交付 Markdown。"""
+13. OCR、记分牌、比分跳变只能作为事实校验依据；解说员台词里不要出现“跳变前/跳变后/OCR/比赛钟/确认依据/由记分牌确认”等内部审计话术。
+14. 不要输出额外章节，不要输出制作提示、内部备注、短视频口播版。
+15. 输出必须是最终可交付 Markdown。"""
 
     @staticmethod
     def _build_v4_commentary_groups(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -676,7 +677,7 @@ def _v4_3_markdown(
             "- **非进球事件**：射门机会、角球、任意球、判罚争议、换人沿用现有视觉事件链路，并在输出阶段做合并和降噪。",
             "- **事项表用途**：最前面的事项列表面向 Web/demo 结构化消费，只有该表的比赛时间使用 10 秒粒度；后续解说文本仍按分钟叙述。",
             "- **Web/demo 保留类型**：进球、射门机会、角球、任意球、判罚争议、换人；点球、越位、半场/全场、庆祝不进入外部事项列表。",
-            "- **写作约束**：不输出具体球员姓名、号码和位置身份；技术统计只基于 Harness 保留事件，不等同官方统计。",
+            "- **写作约束**：不输出具体球员姓名、号码和位置身份；OCR/记分牌/比分跳变只作为事实校验依据，不把“跳变前/跳变后/OCR/比赛钟/确认依据”等内部审计话术写进解说员台词；技术统计只基于 Harness 保留事件，不等同官方统计。",
             "- **端到端约束**：从视频帧、OCR 记分牌和模型视觉叙述自动生成 Markdown，中间不依赖人工或强模型改写最终稿。",
             "",
             "---",
@@ -912,7 +913,7 @@ def _v4_5_plain_group_script(group: list[dict[str, Any]]) -> str:
     goal = next((event for event in group if event.get("event_type") == "goal"), None)
     if goal:
         score = f"，比分来到 {goal.get('score_after')}" if goal.get("score_after") else ""
-        return f"{minute}，{goal.get('team') or '进攻方'}完成进球{score}。{details}。这个节点由记分牌比分跳变确认。"
+        return f"{minute}，{goal.get('team') or '进攻方'}完成进球{score}。{details}。比赛走势随之改变，现场节奏被这一球带起来。"
     if any(event.get("event_type") == "free_kick" for event in group):
         return f"{minute}，场上出现任意球或相关定位球机会。{details}。双方随后围绕罚球点和禁区站位重新组织。"
     if any(event.get("event_type") == "corner" for event in group):
@@ -962,7 +963,7 @@ def _v4_3_multilingual(groups: list[list[dict[str, Any]]], final_score: str) -> 
     for index, group in enumerate(selected, start=1):
         lines.append(f"【事件 {index} - {_display_minute(group[0])}】")
         lines.append(f"\"{_v4_3_group_script(group)}\"")
-    lines.extend([f"【Closing】", f"\"终场比分定格在 {final_score}，这条时间线以记分牌跳变确认进球，更适合后续剪辑和复核。\"", "```", ""])
+    lines.extend([f"【Closing】", f"\"终场比分定格在 {final_score}，这条时间线把关键进攻和比分变化串成完整脉络。\"", "```", ""])
     lines.extend(["### English", "", "```text", "[Opening]", '"Germany and Curacao meet in a fast, physical World Cup match."'])
     for index, group in enumerate(selected, start=1):
         minute = _display_minute(group[0]).replace("第", "").replace("分钟", "'")
@@ -970,31 +971,31 @@ def _v4_3_multilingual(groups: list[list[dict[str, Any]]], final_score: str) -> 
             goal = next(event for event in group if event.get("event_type") == "goal")
             team = "Germany" if "德国" in str(goal.get("team") or goal.get("title") or "") else "Curacao"
             lines.append(f"[Goal {index} - {minute}]")
-            lines.append(f'"{team} scores, {goal.get("score_after") or ""}! The scoreboard confirms the change."')
+            lines.append(f'"{team} score, {goal.get("score_after") or ""}! The match bursts back into life."')
         else:
             lines.append(f"[Event {index} - {minute}]")
             lines.append('"Another key passage raises the tempo."')
     lines.extend([f"[Closing]", f'"Final score: {final_score}."', "```", ""])
-    lines.extend(["### Español", "", "```text", "[Apertura]", '"Alemania y Curazao se enfrentan en un partido intenso, con cada gol validado por el marcador."'])
+    lines.extend(["### Español", "", "```text", "[Apertura]", '"Alemania y Curazao se enfrentan en un partido intenso, con cada acción clave elevando el ritmo."'])
     for index, group in enumerate(selected, start=1):
         minute = _display_minute(group[0]).replace("第", "").replace("分钟", "'")
         if any(event.get("event_type") == "goal" for event in group):
             goal = next(event for event in group if event.get("event_type") == "goal")
             team = "Alemania" if "德国" in str(goal.get("team") or goal.get("title") or "") else "Curazao"
             lines.append(f"[Gol {index} - {minute}]")
-            lines.append(f'"{team} marca, {goal.get("score_after") or ""}. El salto del marcador confirma el gol."')
+            lines.append(f'"{team} marca, {goal.get("score_after") or ""}. El partido se enciende de inmediato."')
         else:
             lines.append(f"[Evento {index} - {minute}]")
             lines.append('"Otra acción clave acelera el ritmo del partido."')
     lines.extend([f"[Cierre]", f'"Marcador final: {final_score}."', "```", ""])
-    lines.extend(["### Français", "", "```text", "[Ouverture]", '"Allemagne contre Curaçao, un match intense où chaque but est verrouillé par le tableau d’affichage."'])
+    lines.extend(["### Français", "", "```text", "[Ouverture]", '"Allemagne contre Curaçao, un match intense où chaque action clé hausse le rythme."'])
     for index, group in enumerate(selected, start=1):
         minute = _display_minute(group[0]).replace("第", "").replace("分钟", "'")
         if any(event.get("event_type") == "goal" for event in group):
             goal = next(event for event in group if event.get("event_type") == "goal")
             team = "Allemagne" if "德国" in str(goal.get("team") or goal.get("title") or "") else "Curaçao"
             lines.append(f"[But {index} - {minute}]")
-            lines.append(f'"{team} marque, {goal.get("score_after") or ""}. Le changement au tableau confirme le but."')
+            lines.append(f'"{team} marque, {goal.get("score_after") or ""}. Le match s’emballe aussitôt."')
         else:
             lines.append(f"[Action {index} - {minute}]")
             lines.append('"Une nouvelle séquence importante hausse le rythme du match."')
@@ -1015,7 +1016,7 @@ def _v4_3_voiceover(groups: list[list[dict[str, Any]]], final_score: str, versio
         lines.append(f"{_voiceover_time_range(start, end)} {_v4_3_short_line(group)}")
     close_start = (len(selected) + 1) * 5
     close_end = close_start + 5
-    lines.extend([f"{_voiceover_time_range(close_start, close_end)} 终场比分 {final_score}，进球全部按记分牌跳变确认。", "```", ""])
+    lines.extend([f"{_voiceover_time_range(close_start, close_end)} 终场比分 {final_score}，关键进攻脉络已经串起来。", "```", ""])
     lines.extend(["### 90 秒完整版", "", "```text", "[00:00-00:10] 各位球迷朋友，欢迎来到这段世界杯关键回合！"])
     for index, group in enumerate(selected, start=1):
         start = 10 + (index - 1) * 12
