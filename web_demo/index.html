@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>德国 vs 库拉索 · V4.4 事项解说 Demo</title>
-    <link rel="stylesheet" href="styles.css?v=v4_4_nav" />
+    <title>德国 vs 库拉索 · V4.5 事项解说 Demo</title>
+    <link rel="stylesheet" href="styles.css?v=v4_5_compact" />
   </head>
   <body>
-    <div class="version-badge" id="versionBadge" aria-label="current demo version">V4.4 · OCR8</div>
+    <div class="version-badge" id="versionBadge" aria-label="current demo version">V4.5 · OCR8</div>
     <div class="variant-controls" aria-label="commentary variant controls">
       <select id="languageSelect" aria-label="语言">
         <option value="zh-CN">中文</option>
@@ -30,13 +30,13 @@
       <img class="hero__image" src="assets/hero-worldcup.png" alt="" />
       <div class="hero__shade"></div>
       <div class="hero__content">
-        <p class="eyebrow">Intern S2 · V4.4 Event Commentary Harness</p>
+        <p class="eyebrow">Intern S2 · V4.5 Event Commentary Harness</p>
         <h1>德国 vs 库拉索</h1>
         <p class="hero__copy">
           从整场比赛视频中提取关键事项，生成可交互回看片段、证据摘要和中文解说文案。
         </p>
         <div class="hero__stats" aria-label="demo summary">
-          <span><strong id="statEvents">56</strong> 个 V4.4 事项</span>
+          <span><strong id="statEvents">43</strong> 个 V4.5 事项</span>
           <span><strong id="statGoals">8</strong> OCR 进球</span>
           <span><strong>10s</strong> 事件回看片段</span>
           <span><strong>1min</strong> 视频 Demo</span>
@@ -58,7 +58,7 @@
           <article class="harness-node">
             <span class="node-index">01</span>
             <h3>输入资产</h3>
-          <p>整场比赛视频、V4.4 Guarded JSON、scoreboard goal events 和赛事基础信息。</p>
+          <p>整场比赛视频、V4.5 Guarded JSON、scoreboard goal events 和赛事基础信息。</p>
           </article>
           <article class="harness-node">
             <span class="node-index">02</span>
@@ -96,7 +96,7 @@
           <span>Skill 渐进式披露</span>
           <span>Memory 分阶段读取</span>
           <span>Sandbox 静态资源生成</span>
-          <span>V4.4 Guarded JSON</span>
+          <span>V4.5 Guarded JSON</span>
           <span>last_before_jump 进球时间</span>
         </div>
       </section>
@@ -107,7 +107,7 @@
             <p class="eyebrow">Interactive Review</p>
             <h2>事项按钮回看</h2>
           </div>
-          <p>先选大类，再选编号；右侧播放对应时间戳前后约 5 秒片段，并展示 V4.4 生成的文案和证据。</p>
+          <p>先选大类和编号，右侧播放片段并显示文案/证据。</p>
         </div>
 
         <div class="review-layout">
@@ -154,6 +154,6 @@
       </section>
     </main>
 
-    <script src="app.js?v=v4_4_nav"></script>
+    <script src="app.js?v=v4_5_compact"></script>
   </body>
 </html>

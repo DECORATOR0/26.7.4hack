@@ -155,6 +155,49 @@ function currentEvidence(item) {
   return variantField(item, "evidence", item.evidence || "");
 }
 
+function compactMatchTime(value) {
+  const text = String(value || "");
+  const match = text.match(/第(\d+)分(?:(\d+)秒)?/);
+  if (!match) return text || "--";
+  return `${Number(match[1])}:${String(Number(match[2] || 0)).padStart(2, "0")}`;
+}
+
+function compactEventLabel(item, index) {
+  const labels = {
+    goal: "进",
+    shot_chance: "射",
+    corner: "角",
+    free_kick: "任",
+    foul_card_dispute: "争",
+    substitution: "换",
+  };
+  return `${labels[item.type] || item.typeLabel || "项"}${index + 1}`;
+}
+
+function compactTeam(item) {
+  const text = `${item.team || ""} ${item.title || ""} ${item.evidence || ""}`;
+  if (text.includes("库拉索")) return "库拉索";
+  if (text.includes("德国")) return "德国";
+  return "";
+}
+
+function compactTitle(item) {
+  const title = currentTitle(item);
+  const team = compactTeam(item);
+  const prefix = team ? `${team} ` : "";
+  if (item.type === "goal") return `${prefix}${item.scoreAfter ? item.scoreAfter : "进球"}`;
+  if (item.type === "shot_chance") {
+    if (/扑|救/.test(title)) return `${prefix}射门被扑`;
+    if (/挡|封|防守/.test(title)) return `${prefix}射门被挡`;
+    return `${prefix}射门机会`;
+  }
+  if (item.type === "corner") return `${prefix}角球`;
+  if (item.type === "free_kick") return `${prefix}${title.includes("前场") ? "前场任意球" : "任意球"}`;
+  if (item.type === "foul_card_dispute") return `${prefix}争议判罚`;
+  if (item.type === "substitution") return `${prefix}换人调整`;
+  return title;
+}
+
 function formatMediaTime(seconds) {
   if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
   const total = Math.floor(seconds);
@@ -470,11 +513,29 @@ function renderTypes() {
 
 function renderEvents(items) {
   eventList.innerHTML = "";
-  for (const item of items) {
+  for (const [index, item] of items.entries()) {
     const button = document.createElement("button");
     button.className = `event-button${item.id === activeEventId ? " is-active" : ""}`;
     button.type = "button";
-    button.innerHTML = `<span>${item.smallLabel}</span><span>${item.matchTime} · ${currentTitle(item)}</span>`;
+    button.title = `${item.matchTime} · ${currentTitle(item)}`;
+
+    const token = document.createElement("span");
+    token.className = "event-token";
+    token.textContent = compactEventLabel(item, index);
+
+    const body = document.createElement("span");
+    body.className = "event-button__body";
+
+    const time = document.createElement("span");
+    time.className = "event-button__time";
+    time.textContent = compactMatchTime(item.matchTime);
+
+    const summary = document.createElement("span");
+    summary.className = "event-button__summary";
+    summary.textContent = compactTitle(item);
+
+    body.append(time, summary);
+    button.append(token, body);
     button.addEventListener("click", () => setActiveEvent(item.id, { play: true, focusPlayer: true }));
     eventList.appendChild(button);
   }

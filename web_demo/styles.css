@@ -479,18 +479,54 @@ main {
 
 .event-button {
   display: grid;
-  grid-template-columns: 56px 1fr;
-  align-items: start;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  min-height: 50px;
+  padding: 8px 9px;
+  overflow-wrap: normal;
 }
 
-.event-button span:first-child {
+.event-token {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  min-height: 30px;
+  border-radius: 5px;
+  background: rgba(242, 201, 76, 0.1);
   color: var(--gold);
+  font-size: 15px;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.event-button span:last-child {
+.event-button__body {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.event-button__time {
+  color: rgba(219, 228, 221, 0.72);
+  font-size: 12px;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-button__summary {
   color: #dbe4dd;
-  line-height: 1.35;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  word-break: keep-all;
 }
 
 .player-panel {
@@ -877,13 +913,23 @@ main {
   }
 
   .event-button {
-    grid-template-columns: 54px minmax(0, 1fr);
+    grid-template-columns: 40px minmax(0, 1fr);
   }
 
-  .event-button span:last-child,
   .event-copy h3,
   .event-copy p {
     overflow-wrap: anywhere;
+  }
+
+  .event-token {
+    width: 32px;
+    min-height: 28px;
+    font-size: 14px;
+  }
+
+  .event-button__summary {
+    font-size: 13px;
+    word-break: keep-all;
   }
 
   .event-copy {
@@ -923,5 +969,11 @@ main {
     margin-top: 22px;
     width: 148px;
     height: 148px;
+  }
+}
+
+@media (max-width: 520px) {
+  .type-list {
+    grid-template-columns: 1fr;
   }
 }
