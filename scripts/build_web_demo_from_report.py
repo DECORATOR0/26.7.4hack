@@ -252,17 +252,17 @@ def copy_variants(event: dict, title: str, evidence_text: str) -> dict:
         passionate = f"{match_time}，球进了！{title}！{f'比分来到 {score}，' if score else ''}这次节点由记分牌比分跳变确认，现场情绪被彻底点燃。"
         steady = f"{match_time}，{team}完成进球{f'，比分变为 {score}' if score else ''}。该进球以记分牌比分跳变作为确认依据。"
     elif event_type == "shot_chance":
-        passionate = f"{match_time}，攻势来了！{title}。{evidence_text}这次射门把比赛节奏再次推高。"
-        steady = f"{match_time}，场上出现射门机会。{evidence_text}"
+        passionate = f"{match_time}，攻势来了！{title}。这次射门把比赛节奏再次推高。"
+        steady = f"{match_time}，场上出现一次射门机会，防守方完成处理。"
     elif event_type in {"corner", "free_kick"}:
-        passionate = f"{match_time}，定位球机会来了！{title}。{evidence_text}禁区里的站位开始紧张起来。"
-        steady = f"{match_time}，{team}获得定位球机会。{evidence_text}"
+        passionate = f"{match_time}，定位球机会来了！{title}。禁区里的站位开始紧张起来。"
+        steady = f"{match_time}，{team}获得定位球机会，双方开始重新布置站位。"
     elif event_type == "foul_card_dispute":
-        passionate = f"{match_time}，裁判哨声让比赛短暂停住！{title}。{evidence_text}"
-        steady = f"{match_time}，裁判处理一次判罚争议。{evidence_text}"
+        passionate = f"{match_time}，裁判哨声让比赛短暂停住！{title}。"
+        steady = f"{match_time}，裁判处理一次判罚争议，比赛节奏短暂停顿。"
     elif event_type == "substitution":
-        passionate = f"{match_time}，场边开始调整！{title}。{evidence_text}球队试图通过换人改变后续节奏。"
-        steady = f"{match_time}，出现换人调整。{evidence_text}"
+        passionate = f"{match_time}，场边开始调整！{title}。球队试图通过换人改变后续节奏。"
+        steady = f"{match_time}，出现换人调整，球队为后续比赛重新安排人员。"
     else:
         steady = passionate
     return {
@@ -443,7 +443,7 @@ def create_title_card(path: Path, title: str, subtitle: str, *, outro: bool = Fa
     for line in fit_text(draw, subtitle, sub_font, 1400, 2):
         draw.text((98, y), line, font=sub_font, fill=(232, 238, 244))
         y += 48
-    draw.text((100, 1018), f"Germany vs Curacao · Intern S2 {VERSION_LABEL} Event-to-Commentary Demo", font=small_font, fill=(198, 213, 224))
+    draw.text((100, 1018), f"Germany vs Curacao · {VERSION_LABEL} Match Review Demo", font=small_font, fill=(198, 213, 224))
     path.parent.mkdir(parents=True, exist_ok=True)
     hero.convert("RGB").save(path, quality=92)
 
@@ -494,10 +494,10 @@ def make_montage(events: list[dict]) -> None:
     montage_dir.mkdir(parents=True, exist_ok=True)
     create_title_card(
         montage_dir / "intro.png",
-        f"德国 vs 库拉索 · {VERSION_LABEL} 事项解说",
-        "基于 Guarded JSON 与 scoreboard goal events 生成交互式片段和一分钟演示视频",
+        f"德国 vs 库拉索 · {VERSION_LABEL} 事项回看",
+        "自动串联关键片段，快速查看进球和主要机会",
     )
-    title_card_to_video(montage_dir / "intro.png", montage_dir / "intro.mp4", 5.0)
+    title_card_to_video(montage_dir / "intro.png", montage_dir / "intro.mp4", 2.0)
 
     goals = [event for event in events if event["type"] == "goal"]
     selected = goals[:6] if len(goals) >= 6 else events[:6]
@@ -510,10 +510,10 @@ def make_montage(events: list[dict]) -> None:
     create_title_card(
         montage_dir / "outro.png",
         "交互式事项回看",
-        f"左侧选择事项类型与编号，右侧查看对应 10 秒片段与 {VERSION_LABEL} 解说文案",
+        f"43 个事项、43 个回看片段、8 个进球，可直接点选播放",
         outro=True,
     )
-    title_card_to_video(montage_dir / "outro.png", montage_dir / "outro.mp4", 5.0)
+    title_card_to_video(montage_dir / "outro.png", montage_dir / "outro.mp4", 2.0)
     concat_parts.append(montage_dir / "outro.mp4")
 
     concat_file = montage_dir / "concat.txt"

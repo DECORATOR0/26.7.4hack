@@ -535,8 +535,16 @@ main {
 }
 
 .video-wrap {
+  position: relative;
+  overflow: hidden;
   background: #050807;
   border-bottom: 1px solid var(--line);
+}
+
+.video-stage {
+  position: relative;
+  overflow: hidden;
+  background: #050807;
 }
 
 .video-wrap video,
@@ -545,6 +553,30 @@ main {
   width: 100%;
   aspect-ratio: 16 / 9;
   background: #050807;
+}
+
+.video-caption {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  z-index: 5;
+  width: min(86%, 840px);
+  max-height: 4.8em;
+  padding: 10px 16px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.68);
+  color: #fff;
+  font-size: clamp(15px, 2vw, 22px);
+  font-weight: 800;
+  line-height: 1.42;
+  text-align: center;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.78);
+  transform: translateX(-50%);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  pointer-events: none;
 }
 
 .custom-video-controls {
@@ -685,43 +717,6 @@ main {
 .video-seek.is-disabled {
   cursor: default;
   opacity: 0.45;
-}
-
-.event-copy {
-  padding: 18px;
-}
-
-.event-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.event-meta span {
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 5px 9px;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.event-copy h3 {
-  margin-bottom: 10px;
-  font-size: 24px;
-  line-height: 1.25;
-}
-
-.event-copy p {
-  color: #dbe4dd;
-  line-height: 1.7;
-}
-
-.event-copy .evidence {
-  margin-bottom: 0;
-  color: var(--muted);
-  border-top: 1px solid var(--line);
-  padding-top: 12px;
 }
 
 .montage {
@@ -916,11 +911,6 @@ main {
     grid-template-columns: 40px minmax(0, 1fr);
   }
 
-  .event-copy h3,
-  .event-copy p {
-    overflow-wrap: anywhere;
-  }
-
   .event-token {
     width: 32px;
     min-height: 28px;
@@ -932,8 +922,12 @@ main {
     word-break: keep-all;
   }
 
-  .event-copy {
-    padding: 16px;
+  .video-caption {
+    bottom: 12px;
+    width: 90%;
+    padding: 8px 10px;
+    font-size: 14px;
+    -webkit-line-clamp: 2;
   }
 
   .custom-video-controls {

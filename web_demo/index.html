@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>德国 vs 库拉索 · V4.5 事项解说 Demo</title>
-    <link rel="stylesheet" href="styles.css?v=v4_5_compact" />
+    <title>德国 vs 库拉索 · V4.5 事项回看 Demo</title>
+    <link rel="stylesheet" href="styles.css?v=v4_5_subtitle" />
   </head>
   <body>
     <div class="version-badge" id="versionBadge" aria-label="current demo version">V4.5 · OCR8</div>
@@ -30,10 +30,10 @@
       <img class="hero__image" src="assets/hero-worldcup.png" alt="" />
       <div class="hero__shade"></div>
       <div class="hero__content">
-        <p class="eyebrow">Intern S2 · V4.5 Event Commentary Harness</p>
+        <p class="eyebrow">V4.5 Match Review Demo</p>
         <h1>德国 vs 库拉索</h1>
         <p class="hero__copy">
-          从整场比赛视频中提取关键事项，生成可交互回看片段、证据摘要和中文解说文案。
+          自动提取关键事项，可点选回看。
         </p>
         <div class="hero__stats" aria-label="demo summary">
           <span><strong id="statEvents">43</strong> 个 V4.5 事项</span>
@@ -48,56 +48,48 @@
       <section class="harness-map" id="executionChain" aria-label="harness architecture">
         <div class="section-title">
           <div>
-            <p class="eyebrow">Harness Map</p>
-            <h2>端到端执行链路</h2>
+            <p class="eyebrow">Workflow</p>
+            <h2>生成流程</h2>
           </div>
-          <p>固定流程承载长视频处理，技能、记忆、沙盒与 Intern S2 分阶段协同，最终落到可追溯的 JSON、片段和解说文稿。</p>
+          <p>从整场视频到可点击网页，自动完成事项定位、片段生成和字幕文案。</p>
         </div>
 
         <div class="harness-flow">
           <article class="harness-node">
             <span class="node-index">01</span>
-            <h3>输入资产</h3>
-          <p>整场比赛视频、V4.5 Guarded JSON、scoreboard goal events 和赛事基础信息。</p>
+            <h3>比赛视频</h3>
+            <p>读取整场比赛视频和基础比赛信息。</p>
           </article>
           <article class="harness-node">
             <span class="node-index">02</span>
-            <h3>Sandbox</h3>
-            <p>受控执行抽帧、切片、转码和一分钟 demo 生成。</p>
+            <h3>识别事项</h3>
+            <p>找出进球、射门机会、角球、任意球、判罚争议和换人。</p>
           </article>
           <article class="harness-node">
             <span class="node-index">03</span>
-            <h3>Skill</h3>
-            <p>加载足球事项定义、证据标准和叙事约束。</p>
+            <h3>校准时间</h3>
+            <p>把比赛时间和视频时间对齐，进球时间以记分牌跳变为准。</p>
           </article>
           <article class="harness-node">
             <span class="node-index">04</span>
-            <h3>Memory</h3>
-            <p>沉淀比分链、复核结论和跨阶段上下文。</p>
+            <h3>生成片段</h3>
+            <p>为每个事项生成可直接播放的回看片段。</p>
           </article>
           <article class="harness-node">
             <span class="node-index">05</span>
-            <h3>Intern S2</h3>
-            <p>完成事项归纳、解说生成和报告组织。</p>
+            <h3>生成字幕</h3>
+            <p>生成中英西法字幕，并支持激情和平淡两种语气。</p>
           </article>
           <article class="harness-node">
             <span class="node-index">06</span>
-            <h3>Guardrail</h3>
-            <p>校验证据、去重和低置信事项，避免无依据扩写。</p>
+            <h3>生成网页</h3>
+            <p>把事项、片段和字幕整理成可点击回看的网页。</p>
           </article>
           <article class="harness-node harness-node--output">
             <span class="node-index">07</span>
-            <h3>Web Output</h3>
-            <p>输出事项表、64 个回看片段、8 个 OCR 进球和一分钟演示视频。</p>
+            <h3>最终输出</h3>
+            <p>43 个事项、43 个回看片段、8 个进球和一分钟演示视频。</p>
           </article>
-        </div>
-
-        <div class="harness-strip" aria-label="harness artifacts">
-          <span>Skill 渐进式披露</span>
-          <span>Memory 分阶段读取</span>
-          <span>Sandbox 静态资源生成</span>
-          <span>V4.5 Guarded JSON</span>
-          <span>last_before_jump 进球时间</span>
         </div>
       </section>
 
@@ -107,7 +99,6 @@
             <p class="eyebrow">Interactive Review</p>
             <h2>事项按钮回看</h2>
           </div>
-          <p>先选大类和编号，右侧播放片段并显示文案/证据。</p>
         </div>
 
         <div class="review-layout">
@@ -116,17 +107,10 @@
 
           <article class="player-panel">
             <div class="video-wrap">
-              <video id="eventVideo" controls preload="metadata" playsinline></video>
-            </div>
-            <div class="event-copy">
-              <div class="event-meta">
-                <span id="eventType">--</span>
-                <span id="eventMatchTime">--</span>
-                <span id="eventWindow">--</span>
+              <div class="video-stage">
+                <video id="eventVideo" controls preload="metadata" playsinline></video>
+                <div class="video-caption" id="eventSubtitle" aria-live="polite"></div>
               </div>
-              <h3 id="eventTitle">选择一个事项</h3>
-              <p id="eventScript">左侧选择事项类型和编号后，这里会显示对应的解说文案。</p>
-              <p class="evidence" id="eventEvidence"></p>
             </div>
           </article>
         </div>
@@ -138,7 +122,6 @@
             <p class="eyebrow">One-Minute Cut</p>
             <h2>一分钟视频 Demo</h2>
           </div>
-          <p>用世界杯主视觉、关键片段和字幕条拼成的快速演示成片。</p>
         </div>
         <video class="montage__video" src="assets/worldcup_demo_1min.mp4" controls preload="metadata" playsinline></video>
       </section>
@@ -154,6 +137,6 @@
       </section>
     </main>
 
-    <script src="app.js?v=v4_5_compact"></script>
+    <script src="app.js?v=v4_5_subtitle"></script>
   </body>
 </html>

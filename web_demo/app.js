@@ -5,12 +5,7 @@ const eventList = document.querySelector("#eventList");
 const video = document.querySelector("#eventVideo");
 const statEvents = document.querySelector("#statEvents");
 const statGoals = document.querySelector("#statGoals");
-const eventType = document.querySelector("#eventType");
-const eventMatchTime = document.querySelector("#eventMatchTime");
-const eventWindow = document.querySelector("#eventWindow");
-const eventTitle = document.querySelector("#eventTitle");
-const eventScript = document.querySelector("#eventScript");
-const eventEvidence = document.querySelector("#eventEvidence");
+const eventSubtitle = document.querySelector("#eventSubtitle");
 const publicLink = document.querySelector("#publicLink");
 const versionBadge = document.querySelector("#versionBadge");
 const languageSelect = document.querySelector("#languageSelect");
@@ -151,10 +146,6 @@ function currentScript(item) {
   return variantField(item, "script", item.script || "暂无解说文案。");
 }
 
-function currentEvidence(item) {
-  return variantField(item, "evidence", item.evidence || "");
-}
-
 function compactMatchTime(value) {
   const text = String(value || "");
   const match = text.match(/第(\d+)分(?:(\d+)秒)?/);
@@ -182,7 +173,7 @@ function compactTeam(item) {
 }
 
 function compactTitle(item) {
-  const title = currentTitle(item);
+  const title = item.title || "";
   const team = compactTeam(item);
   const prefix = team ? `${team} ` : "";
   if (item.type === "goal") return `${prefix}${item.scoreAfter ? item.scoreAfter : "进球"}`;
@@ -227,7 +218,12 @@ function installVideoControls(targetVideo) {
     <span class="video-time" data-video-duration>00:00</span>
     <button class="video-control-button video-control-button--compact" type="button" data-video-fullscreen aria-label="全屏播放">全屏</button>
   `;
-  targetVideo.insertAdjacentElement("afterend", controls);
+  const wrap = targetVideo.closest(".video-wrap");
+  if (wrap) {
+    wrap.insertAdjacentElement("afterend", controls);
+  } else {
+    targetVideo.insertAdjacentElement("afterend", controls);
+  }
 
   const toggle = controls.querySelector("[data-video-toggle]");
   const seek = controls.querySelector("[data-video-seek]");
@@ -484,19 +480,15 @@ function setActiveEvent(id, options = {}) {
     video.src = item.clip;
     video.load();
   }
-  eventType.textContent = `${item.typeLabel} · ${item.certainty || "unknown"}`;
-  eventMatchTime.textContent = `比赛时间 ${item.matchTime || "--"}`;
-  eventWindow.textContent = `${item.clipStart} - ${item.clipEnd}`;
-  eventTitle.textContent = currentTitle(item);
-  eventScript.textContent = currentScript(item);
-  const evidence = currentEvidence(item);
+  if (eventSubtitle) {
+    eventSubtitle.textContent = currentScript(item);
+  }
   if (options.focusPlayer) {
     focusPlayer();
   }
   if (options.play) {
     playSelectedVideo();
   }
-  eventEvidence.textContent = evidence ? `证据：${evidence}` : "";
 }
 
 function renderTypes() {
@@ -517,7 +509,7 @@ function renderEvents(items) {
     const button = document.createElement("button");
     button.className = `event-button${item.id === activeEventId ? " is-active" : ""}`;
     button.type = "button";
-    button.title = `${item.matchTime} · ${currentTitle(item)}`;
+    button.title = `${item.matchTime} · ${item.title || ""}`;
 
     const token = document.createElement("span");
     token.className = "event-token";
@@ -567,7 +559,7 @@ async function init() {
   const response = await fetch("data/events.json", { cache: "no-store" });
   demoData = await response.json();
   if (versionBadge) {
-    versionBadge.textContent = demoData.versionBadge || `${demoData.versionLabel || demoData.version || "V4.4"} · OCR8`;
+    versionBadge.textContent = demoData.versionBadge || `${demoData.versionLabel || demoData.version || "V4.5"} · OCR8`;
   }
   statEvents.textContent = demoData.events.length;
   if (statGoals) {
@@ -577,6 +569,7 @@ async function init() {
 }
 
 init().catch((error) => {
-  eventTitle.textContent = "Demo 数据加载失败";
-  eventScript.textContent = String(error);
+  if (eventSubtitle) {
+    eventSubtitle.textContent = `Demo 数据加载失败：${String(error)}`;
+  }
 });
