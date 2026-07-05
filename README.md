@@ -39,6 +39,7 @@ docs/soccermate_v4_5_product_guide.md       # self-contained uploadable product 
 outputs_event_agent_v4_5/                   # final V4.5 guarded events and scoreboard goals
 outputs_script_report_v4_5/                 # V4.5 items markdown and delivery markdown
 scripts/build_web_demo_from_report.py       # builds web_demo/data/events.json and optional clips
+run_soccermate_v4_5_e2e.py                  # one-command V4.5 pipeline runner
 scripts/run_version4_5_end_to_end.ps1       # pure verification runner
 web_demo/                                   # static web frontend
 ```
@@ -49,21 +50,72 @@ Large media files are intentionally not tracked. To generate clips or montage lo
 web_demo/assets/source_match.mp4
 ```
 
-## Quick Verification
+## Fresh Setup
 
-Install dependencies:
+Use Python 3.11+ or 3.12. From a clean clone:
 
-```bash
+```powershell
+git clone https://github.com/DECORATOR0/26.7.4hack.git
+cd 26.7.4hack
+git switch pure
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
+Copy-Item .env.example .env
 ```
 
-Run the full SoccerMate V4.5 pipeline from the hardcoded source video to the two delivery markdown files:
+Edit `.env` and fill the API key plus video path:
 
-```bash
+```text
+INTERN_S2_API_KEY=your_real_api_token
+SOCCERMATE_VIDEO_PATH=./德国_库拉索.mp4
+```
+
+The video file is not tracked in Git. Put the full match video at `SOCCERMATE_VIDEO_PATH`, or set that value to an absolute path.
+
+Run the full SoccerMate V4.5 pipeline:
+
+```powershell
 python run_soccermate_v4_5_e2e.py
 ```
 
-This command reads `德国_库拉索.mp4`, uses `.env` for the Intern-S2 API key, runs missing stages or reuses completed V4.5 stage outputs, and produces OCR goals, frame narration, event extraction, guardrails, `final_report_v4_5_items.md`, `final_report_v4_5.md`, and web demo data.
+This single command reads the video, uses `.env` for Intern-S2, runs missing stages or reuses completed V4.5 stage outputs, and produces OCR goals, frame narration, event extraction, guardrails, `final_report_v4_5_items.md`, `final_report_v4_5.md`, and web demo data.
+
+Expected final lines include:
+
+```text
+SOCCERMATE V4.5 END TO END DONE
+items_markdown=...\outputs_script_report_v4_5\final_report_v4_5_items.md
+delivery_markdown=...\outputs_script_report_v4_5\final_report_v4_5.md
+web_data=...\web_demo\data\events.json
+```
+
+Expected validated data:
+
+```text
+items = 43
+goal events = 8
+event types = corner, foul_card_dispute, free_kick, goal, shot_chance, substitution
+```
+
+Common `.env` switches:
+
+```text
+SOCCERMATE_VIDEO_PATH=./德国_库拉索.mp4
+SOCCERMATE_REUSE_COMPLETED_STAGE_OUTPUTS=true
+SOCCERMATE_RESUME_CACHED_MODEL_CALLS=true
+SOCCERMATE_FRAME_NARRATION_CONCURRENCY=8
+SOCCERMATE_FRAME_NARRATION_RPM_LIMIT=15
+SOCCERMATE_EVENT_AGENT_CONCURRENCY=3
+SOCCERMATE_EVENT_AGENT_RPM_LIMIT=12
+SOCCERMATE_WEB_SKIP_CLIPS=true
+SOCCERMATE_WEB_SKIP_MONTAGE=true
+```
+
+## Quick Verification
+
+If you only need to rebuild from retained V4.5 artifacts:
 
 Regenerate the V4.5 markdown report from the retained guarded event file:
 

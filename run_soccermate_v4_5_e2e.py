@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
-from src.config import load_intern_config
+from src.config import load_dotenv, load_intern_config
 from src.event_agent import EventAgentOptions, EventAgentRunner
 from src.frame_narration import FrameNarrationOptions, FrameNarrationRunner
 from src.guardrail import GuardrailOptions, V4GuardrailRunner
@@ -19,10 +19,34 @@ from src.visual_spotting import VisualSpottingOptions, VisualSpottingRunner
 
 
 ROOT = Path(__file__).resolve().parent
+load_dotenv(ROOT / ".env")
+
+
+def env_bool(name: str, default: bool) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def env_int(name: str, default: int) -> int:
+    raw = os.getenv(name)
+    return int(raw) if raw else default
+
+
+def env_float(name: str, default: float) -> float:
+    raw = os.getenv(name)
+    return float(raw) if raw else default
+
+
+def env_path(name: str, default: str) -> Path:
+    raw = os.getenv(name, default).strip()
+    path = Path(raw)
+    return path if path.is_absolute() else ROOT / path
 
 # One-command V4.5 delivery settings. Edit these constants when the input match changes.
-VIDEO_PATH = ROOT / "德国_库拉索.mp4"
-MATCH_INFO_PATH = ROOT / "examples" / "match_info.germany_curacao.json"
+VIDEO_PATH = env_path("SOCCERMATE_VIDEO_PATH", "德国_库拉索.mp4")
+MATCH_INFO_PATH = env_path("SOCCERMATE_MATCH_INFO_PATH", "examples/match_info.germany_curacao.json")
 
 VISUAL_OUT = ROOT / "outputs_visual_full_safe"
 BOOTSTRAP_OUT = ROOT / "outputs_soccermate_v4_5_e2e"
@@ -47,32 +71,32 @@ DELIVERY_MARKDOWN_PATH = SCRIPT_REPORT_OUT / "final_report_v4_5.md"
 INTERN_S2_API_BASE = "https://chat.intern-ai.org.cn/api/v1"
 INTERN_S2_MODEL = "intern-s2-preview"
 
-FRAME_INTERVAL_SECONDS = 2.0
-FRAME_SEGMENT_SECONDS = 60.0
-FRAME_MAX_IMAGES_PER_SEGMENT = 30
-FRAME_NARRATION_CONCURRENCY = 8
-FRAME_NARRATION_RPM_LIMIT = 15.0
-FRAME_NARRATION_MAX_TOKENS = 6000
+FRAME_INTERVAL_SECONDS = env_float("SOCCERMATE_FRAME_INTERVAL_SECONDS", 2.0)
+FRAME_SEGMENT_SECONDS = env_float("SOCCERMATE_FRAME_SEGMENT_SECONDS", 60.0)
+FRAME_MAX_IMAGES_PER_SEGMENT = env_int("SOCCERMATE_FRAME_MAX_IMAGES", 30)
+FRAME_NARRATION_CONCURRENCY = env_int("SOCCERMATE_FRAME_NARRATION_CONCURRENCY", 8)
+FRAME_NARRATION_RPM_LIMIT = env_float("SOCCERMATE_FRAME_NARRATION_RPM_LIMIT", 15.0)
+FRAME_NARRATION_MAX_TOKENS = env_int("SOCCERMATE_FRAME_NARRATION_MAX_TOKENS", 6000)
 
-EVENT_CHUNK_SEGMENTS = 12
-EVENT_AGENT_CONCURRENCY = 3
-EVENT_AGENT_RPM_LIMIT = 12.0
-EVENT_AGENT_TEXT_MAX_TOKENS = 10000
-EVENT_AGENT_FINAL_MAX_EVENTS = 80
-EVENT_AGENT_FINAL_MAX_TOKENS = 14000
+EVENT_CHUNK_SEGMENTS = env_int("SOCCERMATE_EVENT_CHUNK_SEGMENTS", 12)
+EVENT_AGENT_CONCURRENCY = env_int("SOCCERMATE_EVENT_AGENT_CONCURRENCY", 3)
+EVENT_AGENT_RPM_LIMIT = env_float("SOCCERMATE_EVENT_AGENT_RPM_LIMIT", 12.0)
+EVENT_AGENT_TEXT_MAX_TOKENS = env_int("SOCCERMATE_EVENT_AGENT_TEXT_MAX_TOKENS", 10000)
+EVENT_AGENT_FINAL_MAX_EVENTS = env_int("SOCCERMATE_EVENT_AGENT_FINAL_MAX_EVENTS", 80)
+EVENT_AGENT_FINAL_MAX_TOKENS = env_int("SOCCERMATE_EVENT_AGENT_FINAL_MAX_TOKENS", 14000)
 
-SCOREBOARD_COARSE_INTERVAL_SEC = 20
-SCOREBOARD_BATCH_SIZE = 12
-SCOREBOARD_RPM_LIMIT = 12.0
-SCOREBOARD_MIN_CONFIDENCE = 0.5
-SCOREBOARD_REFINE_MAX_GAP_SEC = 180
+SCOREBOARD_COARSE_INTERVAL_SEC = env_int("SOCCERMATE_SCOREBOARD_COARSE_INTERVAL_SEC", 20)
+SCOREBOARD_BATCH_SIZE = env_int("SOCCERMATE_SCOREBOARD_BATCH_SIZE", 12)
+SCOREBOARD_RPM_LIMIT = env_float("SOCCERMATE_SCOREBOARD_RPM_LIMIT", 12.0)
+SCOREBOARD_MIN_CONFIDENCE = env_float("SOCCERMATE_SCOREBOARD_MIN_CONFIDENCE", 0.5)
+SCOREBOARD_REFINE_MAX_GAP_SEC = env_int("SOCCERMATE_SCOREBOARD_REFINE_MAX_GAP_SEC", 180)
 SCOREBOARD_GOAL_POLICY = "last_before_jump"
 
-BUILD_WEB_DATA = True
-WEB_BUILD_SKIP_CLIPS = True
-WEB_BUILD_SKIP_MONTAGE = True
-RESUME_CACHED_MODEL_CALLS = True
-REUSE_COMPLETED_STAGE_OUTPUTS = True
+BUILD_WEB_DATA = env_bool("SOCCERMATE_BUILD_WEB_DATA", True)
+WEB_BUILD_SKIP_CLIPS = env_bool("SOCCERMATE_WEB_SKIP_CLIPS", True)
+WEB_BUILD_SKIP_MONTAGE = env_bool("SOCCERMATE_WEB_SKIP_MONTAGE", True)
+RESUME_CACHED_MODEL_CALLS = env_bool("SOCCERMATE_RESUME_CACHED_MODEL_CALLS", True)
+REUSE_COMPLETED_STAGE_OUTPUTS = env_bool("SOCCERMATE_REUSE_COMPLETED_STAGE_OUTPUTS", True)
 
 EXPECTED_WEB_EVENT_COUNT = 43
 EXPECTED_SCOREBOARD_GOAL_COUNT = 8
