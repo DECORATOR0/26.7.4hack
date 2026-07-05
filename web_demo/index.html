@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>德国 vs 库拉索 · V4.4 事项解说 Demo</title>
+    <link rel="stylesheet" href="styles.css?v=v4_4_nav" />
+  </head>
+  <body>
+    <div class="version-badge" id="versionBadge" aria-label="current demo version">V4.4 · OCR8</div>
+    <div class="variant-controls" aria-label="commentary variant controls">
+      <select id="languageSelect" aria-label="语言">
+        <option value="zh-CN">中文</option>
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="es">Español</option>
+      </select>
+      <select id="styleSelect" aria-label="风格">
+        <option value="passionate">激情</option>
+        <option value="steady">稳健</option>
+      </select>
+    </div>
+    <nav class="page-rail" aria-label="页面目录">
+      <a class="page-rail__link is-active" href="#reviewDemo" data-scroll-target="reviewDemo">// 事项回看</a>
+      <a class="page-rail__link" href="#oneMinuteDemo" data-scroll-target="oneMinuteDemo">// 视频 Demo</a>
+      <a class="page-rail__link" href="#executionChain" data-scroll-target="executionChain">// 执行链路</a>
+      <a class="page-rail__link" href="#mobileShare" data-scroll-target="mobileShare">// 手机扫码</a>
+    </nav>
+    <header class="hero" id="top">
+      <img class="hero__image" src="assets/hero-worldcup.png" alt="" />
+      <div class="hero__shade"></div>
+      <div class="hero__content">
+        <p class="eyebrow">Intern S2 · V4.4 Event Commentary Harness</p>
+        <h1>德国 vs 库拉索</h1>
+        <p class="hero__copy">
+          从整场比赛视频中提取关键事项，生成可交互回看片段、证据摘要和中文解说文案。
+        </p>
+        <div class="hero__stats" aria-label="demo summary">
+          <span><strong id="statEvents">56</strong> 个 V4.4 事项</span>
+          <span><strong id="statGoals">8</strong> OCR 进球</span>
+          <span><strong>10s</strong> 事件回看片段</span>
+          <span><strong>1min</strong> 视频 Demo</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="harness-map" id="executionChain" aria-label="harness architecture">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Harness Map</p>
+            <h2>端到端执行链路</h2>
+          </div>
+          <p>固定流程承载长视频处理，技能、记忆、沙盒与 Intern S2 分阶段协同，最终落到可追溯的 JSON、片段和解说文稿。</p>
+        </div>
+
+        <div class="harness-flow">
+          <article class="harness-node">
+            <span class="node-index">01</span>
+            <h3>输入资产</h3>
+          <p>整场比赛视频、V4.4 Guarded JSON、scoreboard goal events 和赛事基础信息。</p>
+          </article>
+          <article class="harness-node">
+            <span class="node-index">02</span>
+            <h3>Sandbox</h3>
+            <p>受控执行抽帧、切片、转码和一分钟 demo 生成。</p>
+          </article>
+          <article class="harness-node">
+            <span class="node-index">03</span>
+            <h3>Skill</h3>
+            <p>加载足球事项定义、证据标准和叙事约束。</p>
+          </article>
+          <article class="harness-node">
+            <span class="node-index">04</span>
+            <h3>Memory</h3>
+            <p>沉淀比分链、复核结论和跨阶段上下文。</p>
+          </article>
+          <article class="harness-node">
+            <span class="node-index">05</span>
+            <h3>Intern S2</h3>
+            <p>完成事项归纳、解说生成和报告组织。</p>
+          </article>
+          <article class="harness-node">
+            <span class="node-index">06</span>
+            <h3>Guardrail</h3>
+            <p>校验证据、去重和低置信事项，避免无依据扩写。</p>
+          </article>
+          <article class="harness-node harness-node--output">
+            <span class="node-index">07</span>
+            <h3>Web Output</h3>
+            <p>输出事项表、64 个回看片段、8 个 OCR 进球和一分钟演示视频。</p>
+          </article>
+        </div>
+
+        <div class="harness-strip" aria-label="harness artifacts">
+          <span>Skill 渐进式披露</span>
+          <span>Memory 分阶段读取</span>
+          <span>Sandbox 静态资源生成</span>
+          <span>V4.4 Guarded JSON</span>
+          <span>last_before_jump 进球时间</span>
+        </div>
+      </section>
+
+      <section class="workspace" id="reviewDemo" aria-label="interactive event demo">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Interactive Review</p>
+            <h2>事项按钮回看</h2>
+          </div>
+          <p>先选大类，再选编号；右侧播放对应时间戳前后约 5 秒片段，并展示 V4.4 生成的文案和证据。</p>
+        </div>
+
+        <div class="review-layout">
+          <nav class="type-list" aria-label="事项大类" id="typeList"></nav>
+          <nav class="event-list" aria-label="事项编号" id="eventList"></nav>
+
+          <article class="player-panel">
+            <div class="video-wrap">
+              <video id="eventVideo" controls preload="metadata" playsinline></video>
+            </div>
+            <div class="event-copy">
+              <div class="event-meta">
+                <span id="eventType">--</span>
+                <span id="eventMatchTime">--</span>
+                <span id="eventWindow">--</span>
+              </div>
+              <h3 id="eventTitle">选择一个事项</h3>
+              <p id="eventScript">左侧选择事项类型和编号后，这里会显示对应的解说文案。</p>
+              <p class="evidence" id="eventEvidence"></p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="montage" id="oneMinuteDemo" aria-label="one minute demo">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">One-Minute Cut</p>
+            <h2>一分钟视频 Demo</h2>
+          </div>
+          <p>用世界杯主视觉、关键片段和字幕条拼成的快速演示成片。</p>
+        </div>
+        <video class="montage__video" src="assets/worldcup_demo_1min.mp4" controls preload="metadata" playsinline></video>
+      </section>
+
+      <section class="mobile-share" id="mobileShare" aria-label="mobile demo qr code">
+        <div>
+          <p class="eyebrow">Mobile Scan</p>
+          <h2>手机扫码交互</h2>
+          <p>扫码后可直接在手机浏览器里选择大标签、小标签，并播放对应片段。</p>
+          <a id="publicLink" href="http://39.105.210.249/">http://39.105.210.249/</a>
+        </div>
+        <img class="qr-code" src="assets/site-qr.png" alt="Web demo QR code" />
+      </section>
+    </main>
+
+    <script src="app.js?v=v4_4_nav"></script>
+  </body>
+</html>
