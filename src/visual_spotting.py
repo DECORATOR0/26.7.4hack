@@ -218,7 +218,10 @@ class VisualSpottingRunner:
             path = frames_dir / f"frame_{idx:05d}_{safe_ts}.jpg"
 
             resized = self._resize_for_llm(frame)
-            cv2.imwrite(str(path), resized, [int(cv2.IMWRITE_JPEG_QUALITY), 78])
+            ok_encode, encoded = cv2.imencode(".jpg", resized, [int(cv2.IMWRITE_JPEG_QUALITY), 78])
+            if not ok_encode:
+                raise RuntimeError(f"Failed to encode frame at {timestamp}")
+            path.write_bytes(encoded.tobytes())
 
             gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
             thumb = cv2.resize(gray, (160, 90), interpolation=cv2.INTER_AREA)
