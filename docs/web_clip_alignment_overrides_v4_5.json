@@ -1,0 +1,71 @@
+{
+  "version": "v4.5",
+  "source": "web_demo/data/events.json + original match video visual audit",
+  "policy": "Use visually audited action points for web clip centers; keep 10-second clip windows.",
+  "overrides": [
+    {
+      "event_id": "F0002",
+      "event_type": "goal",
+      "score_after": "1-0",
+      "original_video_timestamp": "00:14:24",
+      "aligned_video_timestamp": "00:14:22",
+      "note": "Ball/goal action is around 00:14:21-00:14:22; OCR score jump lands slightly later."
+    },
+    {
+      "event_id": "F0007",
+      "event_type": "goal",
+      "score_after": "1-1",
+      "original_video_timestamp": "00:29:38",
+      "aligned_video_timestamp": "00:29:50",
+      "note": "Original OCR pre-jump point is before the attack. The real goal action is around 00:29:50-00:29:51."
+    },
+    {
+      "event_id": "F0013",
+      "event_type": "goal",
+      "score_after": "2-1",
+      "original_video_timestamp": "00:45:42",
+      "aligned_video_timestamp": "00:45:41",
+      "note": "Set-piece delivery and finish occur just before the OCR jump."
+    },
+    {
+      "event_id": "F0019",
+      "event_type": "goal",
+      "score_after": "3-1",
+      "original_video_timestamp": "00:57:20",
+      "aligned_video_timestamp": "00:57:19",
+      "note": "Free-kick finish is visible immediately before the OCR score update."
+    },
+    {
+      "event_id": "F0022",
+      "event_type": "goal",
+      "score_after": "4-1",
+      "original_video_timestamp": "01:01:52",
+      "aligned_video_timestamp": "01:01:48",
+      "note": "Goal action is in the wide shot around 01:01:47-01:01:48; original center is already celebration."
+    },
+    {
+      "event_id": "F0031",
+      "event_type": "goal",
+      "score_after": "5-1",
+      "original_video_timestamp": "01:24:08",
+      "aligned_video_timestamp": "01:24:05",
+      "note": "Goal line/keeper view shows the shot and ball reaching goal around 01:24:04-01:24:05."
+    },
+    {
+      "event_id": "F0034",
+      "event_type": "goal",
+      "score_after": "6-1",
+      "original_video_timestamp": "01:31:34",
+      "aligned_video_timestamp": "01:31:32",
+      "note": "Finish occurs before the OCR update; 01:31:32 keeps the finish centered."
+    },
+    {
+      "event_id": "F0040",
+      "event_type": "goal",
+      "score_after": "7-1",
+      "original_video_timestamp": "01:42:16",
+      "aligned_video_timestamp": "01:42:09",
+      "note": "Original OCR point is celebration/fan shot; the attacking finish is around 01:42:08-01:42:09."
+    }
+  ]
+}

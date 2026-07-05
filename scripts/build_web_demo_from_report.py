@@ -17,6 +17,7 @@ ASSETS = WEB / "assets"
 CLIPS = ASSETS / "clips"
 DATA = WEB / "data"
 SOURCE = ASSETS / "source_match.mp4"
+ALIGNMENT_OVERRIDES_PATH = ROOT / "docs" / "web_clip_alignment_overrides_v4_5.json"
 REPORT_CANDIDATES = [
     ROOT / "outputs_script_report_v4_5" / "final_report_v4_5_items.md",
     ROOT / "outputs_script_report_v4_4" / "final_report_v4_4.md",
@@ -188,6 +189,16 @@ def load_scoreboard_goals() -> list[dict]:
     return data.get("scoreboard_goal_events") or data.get("events") or []
 
 
+def load_clip_alignment_overrides() -> dict[str, dict]:
+    if not ALIGNMENT_OVERRIDES_PATH.exists():
+        return {}
+    data = json.loads(ALIGNMENT_OVERRIDES_PATH.read_text(encoding="utf-8"))
+    overrides = data.get("overrides") if isinstance(data, dict) else data
+    if not isinstance(overrides, list):
+        return {}
+    return {str(item.get("event_id")): item for item in overrides if item.get("event_id")}
+
+
 def apply_scoreboard_goal_overrides(events: list[dict], scoreboard_goals: list[dict]) -> list[dict]:
     if not scoreboard_goals:
         return events
@@ -291,6 +302,7 @@ def _score_from_title(title: str) -> str:
 
 
 def build_demo_data(events: list[dict], scoreboard_goals: list[dict]) -> dict:
+    alignment_overrides = load_clip_alignment_overrides()
     type_counts: dict[str, int] = {}
     items = []
     for event in events:
@@ -302,6 +314,10 @@ def build_demo_data(events: list[dict], scoreboard_goals: list[dict]) -> dict:
         type_label = TYPE_LABELS.get(event_type, event_type)
         clip_name = f"{event['event_id']}_{event_type}.mp4"
         video_timestamp = event.get("video_timestamp") or ""
+        original_video_timestamp = video_timestamp
+        alignment_override = alignment_overrides.get(event["event_id"])
+        if alignment_override and alignment_override.get("aligned_video_timestamp"):
+            video_timestamp = str(alignment_override["aligned_video_timestamp"])
         evidence_text = event_text(event.get("evidence"))
         title = display_title(event)
         items.append(
@@ -314,6 +330,12 @@ def build_demo_data(events: list[dict], scoreboard_goals: list[dict]) -> dict:
                 "videoTimestamp": video_timestamp,
                 "clipStart": seconds_to_timestamp(timestamp_to_seconds(video_timestamp) - 5),
                 "clipEnd": seconds_to_timestamp(timestamp_to_seconds(video_timestamp) + 5),
+                "originalVideoTimestamp": original_video_timestamp,
+                "clipAlignment": {
+                    "applied": bool(alignment_override),
+                    "deltaSeconds": round(timestamp_to_seconds(video_timestamp) - timestamp_to_seconds(original_video_timestamp), 3) if alignment_override else 0,
+                    "note": alignment_override.get("note", "") if alignment_override else "",
+                },
                 "title": title,
                 "certainty": event.get("certainty") or "",
                 "importance": "high" if event_type == "goal" else "medium",
