@@ -1,6 +1,6 @@
-# SoccerMate V4.5 Pure
+# SoccerMate V4.5 Main
 
-This branch is the cleaned V4.5 delivery branch for SoccerMate. It keeps the current football commentary pipeline, the V4.5 retained event outputs, the static web demo code, and the self-contained product guide. Older experiments, old version reports, and deprecated run scripts have been removed.
+This is the cleaned V4.5 delivery branch for SoccerMate. It keeps the current football commentary pipeline, the V4.5 retained event outputs, the static web demo code, and the self-contained product guide. Older experiments, old version reports, and deprecated run scripts have been removed.
 
 ## Public Demo
 
@@ -40,7 +40,7 @@ outputs_event_agent_v4_5/                   # final V4.5 guarded events and scor
 outputs_script_report_v4_5/                 # V4.5 items markdown and delivery markdown
 scripts/build_web_demo_from_report.py       # builds web_demo/data/events.json and optional clips
 run_soccermate_v4_5_e2e.py                  # one-command V4.5 pipeline runner
-scripts/run_version4_5_end_to_end.ps1       # pure verification runner
+scripts/run_version4_5_end_to_end.ps1       # main verification runner
 web_demo/                                   # static web frontend
 ```
 
@@ -57,7 +57,6 @@ Use Python 3.11+ or 3.12. From a clean clone:
 ```powershell
 git clone https://github.com/DECORATOR0/26.7.4hack.git
 cd 26.7.4hack
-git switch pure
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
