@@ -549,7 +549,8 @@ def main() -> None:
     parser.add_argument("--skip-montage", action="store_true", help="Do not rebuild assets/worldcup_demo_1min.mp4.")
     args = parser.parse_args()
 
-    if not SOURCE.exists():
+    requires_source_video = not args.skip_clips or not args.skip_montage
+    if requires_source_video and not SOURCE.exists():
         raise FileNotFoundError(f"Missing source video: {SOURCE}")
     if not REPORT_PATH.exists() and "v4_3_2" not in EVENTS_PATH.as_posix():
         raise FileNotFoundError(f"Missing report: {REPORT_PATH}")

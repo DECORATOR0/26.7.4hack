@@ -1,102 +1,113 @@
-# World Cup Commentary Harness
+# InternCast V4.5 Prune
 
-面向足球比赛视频的固定阶段 Agentic Harness。输入一段比赛 MP4，系统自动完成视频预处理、多模态证据提取、关键事件识别、解说脚本生成、事实校验和格式化输出。
+This branch is the cleaned V4.5 delivery branch. It keeps the current football commentary pipeline, the V4.5 retained event outputs, the static web demo code, and the self-contained product guide. Older experiments, old version reports, and deprecated run scripts have been removed.
 
-本项目当前默认任务是：
+## Public Demo
+
+<http://39.105.210.249/>
+
+The web demo shows the Germany vs Curacao match review with retained V4.5 event types, event clips, multilingual copy, and Chinese style switching.
+
+## What V4.5 Does
+
+Input: a full football match video plus match metadata.
+
+Output:
+
+- retained event list for web/demo consumption
+- OCR-confirmed goal timeline
+- Chinese commentary scripts in passionate and steady styles
+- English, Spanish, and French commentary snippets
+- subtitle and voiceover scripts
+- static web demo data
+
+V4.5 keeps these external event types:
+
+- goal
+- shot_chance
+- corner
+- free_kick
+- foul_card_dispute
+- substitution
+
+It excludes penalty, offside, half/full-time markers, and celebration-only events from the external event list.
+
+## Key Paths
 
 ```text
-2026 年美加墨世界杯 E 组第 1 轮：德国 7:1 库拉索
+docs/interncast_v4_5_product_guide.md       # self-contained uploadable product guide
+outputs_event_agent_v4_5/                   # final V4.5 guarded events and scoreboard goals
+outputs_script_report_v4_5/                 # V4.5 items markdown and delivery markdown
+scripts/build_web_demo_from_report.py       # builds web_demo/data/events.json and optional clips
+scripts/run_version4_5_end_to_end.ps1       # prune verification runner
+web_demo/                                   # static web frontend
 ```
 
-## 快速运行
+Large media files are intentionally not tracked. To generate clips or montage locally, place the source video at:
 
-1. 安装依赖：
+```text
+web_demo/assets/source_match.mp4
+```
+
+## Quick Verification
+
+Install dependencies:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-2. 准备 `.env`：
-
-```env
-INTERN_S2_API_BASE=https://chat.intern-ai.org.cn/api/v1
-INTERN_S2_API_KEY=your_api_token_here
-INTERN_S2_MODEL=intern-s2-preview
-```
-
-3. 运行：
+Regenerate the V4.5 markdown report from the retained guarded event file:
 
 ```bash
-python run.py --video "德国_库拉索.mp4" --out outputs
+python run_script_report.py --events outputs_event_agent_v4_5/final_events_guarded_v4_5.json --match-info examples/match_info.germany_curacao.json --out outputs_script_report_v4_5 --report-version v4_5_markdown
 ```
 
-更快的本地调试：
+Build web demo data without requiring the large source video:
 
 ```bash
-python run.py --video "德国_库拉索.mp4" --out outputs --frame-interval 180 --max-frames 24 --vision-frames 6
+python scripts/build_web_demo_from_report.py --skip-clips --skip-montage
 ```
 
-## 输出结果
+Or run the PowerShell verification script:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\run_version4_5_end_to_end.ps1
+```
+
+Expected web data:
 
 ```text
-outputs/
-├── audio.wav                 # 如果本机安装 ffmpeg，会自动生成
-├── video_metadata.json
-├── frame_index.json
-├── evidence.json
-├── events.json
-├── commentary.md
-├── subtitles.srt
-├── highlights.json
-├── fact_check.json
-└── run_log.md
+version = v4.5
+events = 43
+goal events = 8
+event types = corner, foul_card_dispute, free_kick, goal, shot_chance, substitution
 ```
 
-## Harness 阶段
+## Local Web Build With Media
+
+If `web_demo/assets/source_match.mp4` exists, generate event clips and montage:
+
+```bash
+python scripts/build_web_demo_from_report.py
+```
+
+Then serve locally:
+
+```bash
+cd web_demo
+python -m http.server 8105
+```
+
+Open:
 
 ```text
-1. 视频预处理
-   - 读取视频元信息
-   - 按间隔抽帧
-   - 对抽帧做运动评分
-   - 使用 imageio-ffmpeg 提取音频
-
-2. 多模态证据提取
-   - 汇总视频元信息、抽帧索引、关键帧、音频/ASR/OCR 可用性
-   - 如果有 whisper/faster-whisper，尝试 ASR
-   - 如果有 tesseract，后续可接 OCR
-
-3. 关键事件识别与时间线构建
-   - 调用 Intern-S2-Preview
-   - 基于比赛信息、证据摘要和关键帧生成 `events.json`
-
-4. 解说脚本生成
-   - 调用 Intern-S2-Preview
-   - 基于 `events.json` 生成完整解说、字幕和集锦结构
-
-5. 校验与输出
-   - 本地检查比分、进球数、时间顺序
-   - 调用 Intern-S2-Preview 生成结果分析
-   - 写出最终文件
+http://127.0.0.1:8105/
 ```
 
-## 设计原则
+## Notes
 
-- 固定阶段骨架，避免端到端黑盒 Agent 不稳定。
-- 每阶段都有中间产物，方便评审检查和现场演示。
-- 模型只能基于前序证据生成，不允许编造球员姓名和不存在的进球。
-- 真实 API Key 只放 `.env` 或系统环境变量，不写进提交文件。
-
-## 可选增强
-
-本项目不强依赖这些工具，但安装后会自动增强：
-
-- `faster-whisper` 或 `openai-whisper`：从音频转写原始解说。
-- `tesseract` + `pytesseract`：识别比分牌和比赛时间。
-- `LangGraph`：后续可把 5 个阶段包装成状态图节点。
-
-## 开发原则补充
-
-- 不要在端到端跑完后，为了强行得到期望结果而手动补丁式修改 final report 或 final event JSON。
-- 如果 OCR 进球事实、事项抽取或报告文案有误，应回到上游证据、提示词、模型阶段或校验流程修正后重新跑。
-- V4 系列最终报告必须能追溯到实际端到端脚本输出；人工审查结论要单独记录，不要混进生成产物。
+- Goal timing uses scoreboard OCR score jumps.
+- The item markdown uses 10-second match-time granularity for web/demo generation.
+- The delivery markdown uses minute-level narrative text for readability.
+- Commentary must stay evidence-grounded and avoid unsupported player names, numbers, assists, VAR, or card claims.

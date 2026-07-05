@@ -865,8 +865,12 @@ def _v4_3_group_heading(group: list[dict[str, Any]]) -> str:
 
 
 def _v4_3_group_kind(group: list[dict[str, Any]]) -> str:
-    kinds = {_event_kind_cn(str(event.get("event_type") or "")) for event in group}
-    return "/".join(kind for kind in kinds if kind) or "关键事件"
+    kinds: list[str] = []
+    for event in group:
+        kind = _event_kind_cn(str(event.get("event_type") or ""))
+        if kind and kind not in kinds:
+            kinds.append(kind)
+    return "/".join(kinds) or "关键事件"
 
 
 def _v4_3_group_title(group: list[dict[str, Any]]) -> str:
