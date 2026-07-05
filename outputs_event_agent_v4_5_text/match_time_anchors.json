@@ -1,0 +1,32 @@
+[
+  {
+    "video_timestamp": "00:09:14",
+    "match_time": "8'",
+    "period": "first_half",
+    "source": "scoreboard"
+  },
+  {
+    "video_timestamp": "00:14:24",
+    "match_time": "5:17",
+    "period": "first_half",
+    "source": "scoreboard"
+  },
+  {
+    "video_timestamp": "00:29:38",
+    "match_time": "20:31",
+    "period": "first_half",
+    "source": "scoreboard"
+  },
+  {
+    "video_timestamp": "00:58:44",
+    "match_time": "45+5'",
+    "period": "halftime",
+    "source": "scoreboard"
+  },
+  {
+    "video_timestamp": "01:50:12",
+    "match_time": "90+4'",
+    "period": "fulltime",
+    "source": "scoreboard"
+  }
+]

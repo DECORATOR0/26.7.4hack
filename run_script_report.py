@@ -15,7 +15,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-tokens", type=int, default=10000, help="Max output tokens for the report")
     parser.add_argument(
         "--report-version",
-        choices=["v2", "v3", "v3_markdown", "v4_markdown", "v4_3_markdown", "v4_4_markdown"],
+        choices=[
+            "v2",
+            "v3",
+            "v3_markdown",
+            "v4_markdown",
+            "v4_3_markdown",
+            "v4_4_markdown",
+            "v4_5_markdown",
+            "v4_6_markdown",
+        ],
         default="v2",
         help="Report output schema",
     )

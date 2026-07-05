@@ -1,0 +1,12 @@
+{
+  "segments": 111,
+  "success": 111,
+  "failures": 0,
+  "prompt_tokens": 1483725,
+  "completion_tokens": 287184,
+  "total_tokens": 1770909,
+  "avg_total_tokens_per_segment": 15954.1,
+  "sum_request_elapsed_seconds": 3666.912,
+  "concurrency": 8,
+  "rpm_limit": 15.0
+}

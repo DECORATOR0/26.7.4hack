@@ -410,7 +410,7 @@ def _goal_to_v4_event(
         "stoppage_minute": stoppage,
         "match_time_source": "scoreboard_ocr",
         "event_type": "goal",
-        "title": f"{team} team goal, score becomes {score_text}",
+        "title": f"{team}队进球，比分变为{score_text}",
         "certainty": "confirmed",
         "evidence_level": "scoreboard_ocr",
         "confidence": round(float(current.confidence), 3),
@@ -423,15 +423,15 @@ def _goal_to_v4_event(
         "score_jump_previous_timestamp": previous_timestamp,
         "score_jump_current_timestamp": current_timestamp,
         "evidence": [
-            f"Scoreboard jumped from {previous_score[0]}-{previous_score[1]} to {score_text}",
+            f"记分牌比分从{previous_score[0]}-{previous_score[1]}跳变为{score_text}",
             (
-                f"Last-before-jump OCR anchor: score {previous_score[0]}-{previous_score[1]}, "
-                f"clock {previous_clock or 'unknown'}, video {previous_timestamp}; "
-                f"first-after-jump OCR: score {score_text}, clock {current_clock or 'unknown'}, video {current_timestamp}"
+                f"跳变前最后OCR：比分{previous_score[0]}-{previous_score[1]}，"
+                f"比赛钟{previous_clock or 'unknown'}，视频{previous_timestamp}；"
+                f"跳变后首次OCR：比分{score_text}，比赛钟{current_clock or 'unknown'}，视频{current_timestamp}"
             ),
         ],
         "needs_more_review": False,
-        "script_angle": f"{team} goal confirmed by scoreboard score jump to {score_text}",
+        "script_angle": f"{team}队进球由记分牌比分跳变确认，比分变为{score_text}",
     }
 
 

@@ -36,9 +36,24 @@ class ScriptReportRunner:
         events = self._normalize_events(events_doc)
         match_info = self._load_match_info()
 
-        if self.options.report_version in {"v4_3_markdown", "v4_4_markdown"}:
-            markdown = _v4_3_markdown(events, match_info)
-            suffix = "v4_4" if self.options.report_version == "v4_4_markdown" else "v4_3"
+        if self.options.report_version in {"v4_3_markdown", "v4_4_markdown", "v4_5_markdown", "v4_6_markdown"}:
+            suffix_map = {
+                "v4_3_markdown": "v4_3",
+                "v4_4_markdown": "v4_4",
+                "v4_5_markdown": "v4_5",
+                "v4_6_markdown": "v4_6",
+            }
+            suffix = suffix_map[self.options.report_version]
+            split_items = suffix in {"v4_5", "v4_6"}
+            if split_items:
+                items_markdown = _v4_3_items_markdown(events, table_time_precision="10s")
+                write_text(self.out_dir / f"final_report_{suffix}_items.md", items_markdown)
+            markdown = _v4_3_markdown(
+                events,
+                match_info,
+                suffix,
+                include_front_sections=not split_items,
+            )
             write_text(self.out_dir / f"final_report_{suffix}.md", markdown)
             write_json(self.out_dir / "script_report_runtime_summary.json", self._summary(None, events, markdown))
             return self.out_dir
@@ -147,7 +162,7 @@ class ScriptReportRunner:
         else:
             events = []
         normalized = [dict(event) for event in events if isinstance(event, dict)]
-        if self.options.report_version in {"v4_markdown", "v4_3_markdown", "v4_4_markdown"}:
+        if self.options.report_version in {"v4_markdown", "v4_3_markdown", "v4_4_markdown", "v4_5_markdown", "v4_6_markdown"}:
             return _prepare_v4_report_events(normalized)
 
         period_order = {
@@ -596,32 +611,41 @@ def _v4_events_related(group_events: list[dict[str, Any]], event: dict[str, Any]
     return False
 
 
-def _v4_3_markdown(events: list[dict[str, Any]], match_info: dict[str, Any]) -> str:
+def _v4_3_markdown(
+    events: list[dict[str, Any]],
+    match_info: dict[str, Any],
+    version: str = "v4_3",
+    include_front_sections: bool = True,
+) -> str:
     match_name = match_info.get("match_name") or "德国 vs 库拉索"
     final_score = _v4_3_final_score(events, match_info)
     groups = _v4_3_event_groups(events)
+    version_label = version.upper().replace("_", ".")
     lines: list[str] = []
-    lines.extend(_v4_3_compat_event_table(events))
-    lines.extend(["", "# 解说文案", ""])
-    for event in events:
-        lines.extend(
-            [
-                f"## {_display_minute(event)}：{_sanitize_identity_text(str(event.get('title') or '关键事件'))}",
-                _v4_3_single_event_script(event),
-                "",
-            ]
-        )
+    if include_front_sections:
+        lines.extend(_v4_3_compat_event_table(events, table_time_precision="10s" if version in {"v4_5", "v4_6"} else "display"))
+        lines.extend(["", "# 解说文案", ""])
+        for event in events:
+            lines.extend(
+                [
+                    f"## {_display_minute(event)}：{_sanitize_identity_text(str(event.get('title') or '关键事件'))}",
+                    _v4_3_single_event_script(event),
+                    "",
+                ]
+            )
 
     lines.extend(
         [
-            "# 交付扩展脚本（V4.3 融合版）",
+            f"# 交付扩展脚本（{version_label} 融合版）",
             "",
             "## 文档说明",
             "",
             f"- **比赛**：{match_name}",
-            "- **进球口径**：V4.3 的进球只采纳记分牌 OCR 比分跳变，不再把回放、庆祝或进球信息条单独升格为新进球。",
+            f"- **进球口径**：{version_label} 的进球只采纳记分牌 OCR 比分跳变，不再把回放、庆祝或进球信息条单独升格为新进球。",
             "- **非进球事件**：角球、任意球、犯规、越位、换人等沿用现有视觉事件链路，并在输出阶段做合并和降噪。",
+            "- **事项表用途**：最前面的事项列表面向 Web/demo 结构化消费，只有该表的比赛时间使用 10 秒粒度；后续解说文本仍按分钟叙述。",
             "- **写作约束**：不输出具体球员姓名、号码和位置身份；技术统计只基于 Harness 保留事件，不等同官方统计。",
+            "- **端到端约束**：从视频帧、OCR 记分牌和模型视觉叙述自动生成 Markdown，中间不依赖人工或强模型改写最终稿。",
             "",
             "---",
             "",
@@ -632,7 +656,7 @@ def _v4_3_markdown(events: list[dict[str, Any]], match_info: dict[str, Any]) -> 
             "```text",
             f"【镜头/画面提示】：全场全景，比分牌显示 {match_name}",
             "解说员：",
-            f"“欢迎来到世界杯赛场！{match_name}，这场比赛的节奏从一开始就被德国队的压迫拉高，库拉索也在寻找反击和定位球机会。V4.3 会把每一次比分变化锁定在记分牌跳变上，让关键节点更稳。”",
+            f"“欢迎来到世界杯赛场！{match_name}，这场比赛的节奏从一开始就被德国队的压迫拉高，库拉索也在寻找反击和定位球机会。{version_label} 会把每一次比分变化锁定在记分牌跳变上，让关键节点更稳。”",
             "```",
             "",
             "### 关键进程",
@@ -662,7 +686,7 @@ def _v4_3_markdown(events: list[dict[str, Any]], match_info: dict[str, Any]) -> 
     lines.extend(["", "---", "", "## 第五部分：字幕脚本", ""])
     lines.extend(_v4_3_subtitle_blocks(events, final_score))
     lines.extend(["", "---", "", "## 第六部分：集锦讲解脚本（3分钟版）", ""])
-    lines.extend(_v4_3_highlight_script(groups, final_score))
+    lines.extend(_v4_3_highlight_script(groups, final_score, version_label))
     lines.extend(["", "---", "", "## 第七部分：技术统计分析", ""])
     lines.extend(_v4_3_stats_table(events))
     lines.extend(
@@ -678,6 +702,7 @@ def _v4_3_markdown(events: list[dict[str, Any]], match_info: dict[str, Any]) -> 
             f"- 融合讲解节点数：{len(groups)}",
             f"- 进球节点数：{sum(1 for event in events if event.get('event_type') == 'goal')}",
             "- 已将进球判定切换为记分牌 OCR 分数跳变硬规则。",
+            "- 事项列表的比赛时间已限制为 10 秒粒度，便于 Web/demo 时间轴消费。",
             "- 普通回放、庆祝和进球信息条不再单独作为新进球依据。",
             "- 非进球事件仍需要后续结合画面继续做准确率优化。",
             "",
@@ -686,7 +711,7 @@ def _v4_3_markdown(events: list[dict[str, Any]], match_info: dict[str, Any]) -> 
     return "\n".join(lines)
 
 
-def _v4_3_compat_event_table(events: list[dict[str, Any]]) -> list[str]:
+def _v4_3_compat_event_table(events: list[dict[str, Any]], table_time_precision: str = "display") -> list[str]:
     lines = [
         "# 事项列表",
         "",
@@ -701,7 +726,7 @@ def _v4_3_compat_event_table(events: list[dict[str, Any]]) -> list[str]:
             evidence_text = str(evidence or "")
         values = [
             str(index),
-            str(event.get("match_time") or ""),
+            _event_table_match_time(event, table_time_precision),
             str(event.get("video_timestamp") or event.get("timestamp") or ""),
             str(event.get("event_type") or ""),
             str(event.get("title") or ""),
@@ -710,6 +735,29 @@ def _v4_3_compat_event_table(events: list[dict[str, Any]]) -> list[str]:
         ]
         lines.append("| " + " | ".join(_escape_markdown_cell(_sanitize_identity_text(value)) for value in values) + " |")
     return lines
+
+
+def _v4_3_items_markdown(events: list[dict[str, Any]], table_time_precision: str = "10s") -> str:
+    return "\n".join(_v4_3_compat_event_table(events, table_time_precision=table_time_precision)).rstrip() + "\n"
+
+
+def _event_table_match_time(event: dict[str, Any], precision: str) -> str:
+    raw = str(event.get("match_time") or "").strip()
+    if precision != "10s":
+        return raw
+    seconds = _match_time_to_seconds(raw)
+    if seconds is None:
+        minute = event.get("match_minute")
+        stoppage = event.get("stoppage_minute")
+        try:
+            base_seconds = int(minute) * 60
+            if int(stoppage or 0) > 0 and int(minute) <= 90:
+                base_seconds += int(stoppage) * 60
+            seconds = base_seconds
+        except (TypeError, ValueError):
+            return raw
+    rounded = int((seconds + 5) // 10 * 10)
+    return _format_match_seconds(rounded, always_seconds=True)
 
 
 def _v4_3_event_groups(events: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
@@ -845,7 +893,31 @@ def _v4_3_multilingual(groups: list[list[dict[str, Any]]], final_score: str) -> 
         else:
             lines.append(f"[Event {index} - {minute}]")
             lines.append('"Another key passage raises the tempo."')
-    lines.extend([f"[Closing]", f'"Final score: {final_score}."', "```"])
+    lines.extend([f"[Closing]", f'"Final score: {final_score}."', "```", ""])
+    lines.extend(["### Español", "", "```text", "[Apertura]", '"Alemania y Curazao se enfrentan en un partido intenso, con cada gol validado por el marcador."'])
+    for index, group in enumerate(selected, start=1):
+        minute = _display_minute(group[0]).replace("第", "").replace("分钟", "'")
+        if any(event.get("event_type") == "goal" for event in group):
+            goal = next(event for event in group if event.get("event_type") == "goal")
+            team = "Alemania" if "德国" in str(goal.get("team") or goal.get("title") or "") else "Curazao"
+            lines.append(f"[Gol {index} - {minute}]")
+            lines.append(f'"{team} marca, {goal.get("score_after") or ""}. El salto del marcador confirma el gol."')
+        else:
+            lines.append(f"[Evento {index} - {minute}]")
+            lines.append('"Otra acción clave acelera el ritmo del partido."')
+    lines.extend([f"[Cierre]", f'"Marcador final: {final_score}."', "```", ""])
+    lines.extend(["### Français", "", "```text", "[Ouverture]", '"Allemagne contre Curaçao, un match intense où chaque but est verrouillé par le tableau d’affichage."'])
+    for index, group in enumerate(selected, start=1):
+        minute = _display_minute(group[0]).replace("第", "").replace("分钟", "'")
+        if any(event.get("event_type") == "goal" for event in group):
+            goal = next(event for event in group if event.get("event_type") == "goal")
+            team = "Allemagne" if "德国" in str(goal.get("team") or goal.get("title") or "") else "Curaçao"
+            lines.append(f"[But {index} - {minute}]")
+            lines.append(f'"{team} marque, {goal.get("score_after") or ""}. Le changement au tableau confirme le but."')
+        else:
+            lines.append(f"[Action {index} - {minute}]")
+            lines.append('"Une nouvelle séquence importante hausse le rythme du match."')
+    lines.extend([f"[Clôture]", f'"Score final : {final_score}."', "```"])
     return lines
 
 
@@ -891,14 +963,14 @@ def _v4_3_subtitle_blocks(events: list[dict[str, Any]], final_score: str) -> lis
     return lines
 
 
-def _v4_3_highlight_script(groups: list[list[dict[str, Any]]], final_score: str) -> list[str]:
+def _v4_3_highlight_script(groups: list[list[dict[str, Any]]], final_score: str, version_label: str = "V4.3") -> list[str]:
     selected = groups[:6]
     lines = [
         "```text",
         "（背景音乐：轻快的体育音乐）",
         "",
         "【开场（0:00-0:20）】",
-        "\"各位球迷朋友，今天我们回看德国队与库拉索队这场节奏拉满的比赛。V4.3 版本用记分牌跳变锁定进球，再把其他关键画面串成解说节点。\"",
+        f"\"各位球迷朋友，今天我们回看德国队与库拉索队这场节奏拉满的比赛。{version_label} 版本用记分牌跳变锁定进球，再把其他关键画面串成解说节点。\"",
         "",
     ]
     for index, group in enumerate(selected, start=1):
@@ -991,6 +1063,16 @@ def _cn_index(index: int) -> str:
 def _prepare_v4_report_events(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
     events.sort(key=lambda event: (_event_video_seconds(event), str(event.get("event_id") or "")))
     for index, event in enumerate(events):
+        ocr_match_clock = _extract_scoreboard_match_clock(event)
+        if ocr_match_clock:
+            event["match_time"] = _format_match_time_display(ocr_match_clock)
+            event["match_time_source"] = "scoreboard_ocr"
+            seconds = _match_time_to_seconds(ocr_match_clock)
+            if seconds is not None:
+                event["match_minute"] = seconds // 60
+                event["stoppage_minute"] = 0
+            continue
+
         if _looks_like_opening_seconds_misread(events, index):
             event["match_time"] = "第1分钟"
             event["match_minute"] = 1
@@ -1005,8 +1087,41 @@ def _prepare_v4_report_events(events: list[dict[str, Any]]) -> list[dict[str, An
             event["match_time_source"] = "estimated" if inferred else "video_time"
             continue
 
+        if _looks_like_video_timestamp_as_match_clock(event, raw_match_time):
+            inferred = _infer_match_time_from_neighbors(events, index, max_distance=300, trusted_only=True)
+            if inferred:
+                event["match_time"] = inferred
+                event["match_time_source"] = "corrected_from_scoreboard_neighbors"
+                seconds = _match_time_to_seconds(inferred)
+                if seconds is not None:
+                    event["match_minute"] = seconds // 60
+                    event["stoppage_minute"] = 0
+                continue
+
         event["match_time"] = _format_match_time_display(raw_match_time)
     return events
+
+
+def _extract_scoreboard_match_clock(event: dict[str, Any]) -> str | None:
+    text_parts: list[str] = []
+    for key in ("evidence", "description", "script_angle", "score_panel_summary", "visible_text"):
+        value = event.get(key)
+        if isinstance(value, list):
+            text_parts.extend(str(item) for item in value)
+        elif value:
+            text_parts.append(str(value))
+    text = " ".join(text_parts)
+    if not text:
+        return None
+    patterns = [
+        r"(?:比赛钟|比赛时间|比赛时钟|记分牌时间|比分牌时间)\s*[:：]?\s*(\d{1,3})\s*[:：]\s*([0-5]?\d)",
+        r"(?:match\s*clock|game\s*clock|scoreboard\s*time)\s*[:：]?\s*(\d{1,3})\s*[:：]\s*([0-5]?\d)",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, text, flags=re.IGNORECASE)
+        if match:
+            return f"{int(match.group(1)):02d}:{int(match.group(2)):02d}"
+    return None
 
 
 def _event_video_seconds(event: dict[str, Any]) -> float:
@@ -1040,17 +1155,43 @@ def _looks_like_opening_seconds_misread(events: list[dict[str, Any]], index: int
     return False
 
 
-def _infer_match_time_from_neighbors(events: list[dict[str, Any]], index: int) -> str | None:
+def _looks_like_video_timestamp_as_match_clock(event: dict[str, Any], raw_match_time: str) -> bool:
+    source = str(event.get("match_time_source") or "").lower()
+    if source not in {"estimated", "narrative", "unknown", "video_time"}:
+        return False
+    match = re.fullmatch(r"(\d{1,3}):([0-5]\d)", raw_match_time.strip())
+    if not match:
+        return False
+    video = str(event.get("video_timestamp") or event.get("timestamp") or "").strip()
+    video_match = re.fullmatch(r"(?:(\d{1,2}):)?(\d{1,2}):([0-5]\d)", video)
+    if not video_match:
+        return False
+    return int(match.group(1)) == int(video_match.group(2)) and int(match.group(2)) == int(video_match.group(3))
+
+
+def _infer_match_time_from_neighbors(
+    events: list[dict[str, Any]],
+    index: int,
+    max_distance: float = 120,
+    trusted_only: bool = False,
+) -> str | None:
     current_video = _event_video_seconds(events[index])
     candidates: list[tuple[float, int]] = []
     for offset, other in enumerate(events):
         if offset == index:
             continue
+        if trusted_only and str(other.get("match_time_source") or "").lower() not in {
+            "scoreboard",
+            "scoreboard_ocr",
+            "corrected_scoreboard",
+            "corrected_from_scoreboard_neighbors",
+        }:
+            continue
         match_seconds = _match_time_to_seconds(str(other.get("match_time") or ""))
         if match_seconds is None:
             continue
         video_seconds = _event_video_seconds(other)
-        if abs(video_seconds - current_video) > 120:
+        if abs(video_seconds - current_video) > max_distance:
             continue
         candidates.append((abs(video_seconds - current_video), int(match_seconds + current_video - video_seconds)))
     if not candidates:
@@ -1094,10 +1235,10 @@ def _format_match_time_display(value: str) -> str:
     return text
 
 
-def _format_match_seconds(seconds: int) -> str:
+def _format_match_seconds(seconds: int, always_seconds: bool = False) -> str:
     minute = seconds // 60
     second = seconds % 60
-    if second == 0:
+    if second == 0 and not always_seconds:
         return f"第{minute}分钟"
     return f"第{minute}分{second:02d}秒"
 

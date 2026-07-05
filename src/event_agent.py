@@ -323,7 +323,7 @@ class EventAgentRunner:
 
     def _text_prompt_version(self) -> str:
         if self.options.schema_version == "v4":
-            return "v4_ocr_score_panel_fixed_event_set"
+            return "v4_5_ocr_score_panel_fixed_event_set"
         return "v3_fixed_event_set" if self.options.schema_version == "v3" else "v2_more_events"
 
     def _build_text_agent_prompt(self, chunk: dict[str, Any]) -> str:
@@ -400,6 +400,8 @@ class EventAgentRunner:
             v4_ocr_rule = """
 V4 新增前置规则：
 - 判断射门、入网、扑出、庆祝、点球或任意球直接攻门前，必须先读 observation 里的 visible_text、scoreboard、score_panel、score_panel_summary。
+- 读记分牌比赛钟时必须保留 MM:SS 语义：例如 05:17 是第 5 分 17 秒，20:31 是第 20 分 31 秒，46:14 是下半场第 46 分 14 秒；不要把 05:17 写成第 6 分钟，也不要把视频时间当比赛时间。
+- 如果 narrative 中含有 FIXED_GOAL_MEMORY，goal 只能来自这些固定进球事实；回放、庆祝、进球信息条和比分未变画面都不能生成新的 goal。
 - 如果 OCR/比分牌面板显示比分未变，不要把回放或庆祝误升成新进球。
 - 如果 OCR/比分牌面板看不清，保留 `certainty=probable|uncertain`，不要编造比分链。
 - evidence 里尽量写清“比分牌/OCR 是否支持该射门结果”，但不要输出球员姓名、号码或身份。
@@ -436,9 +438,10 @@ V4 新增前置规则：
 4. 如果事件关键但 narrative 含糊、前后冲突、或时间点不稳，needs_image_review=true，review_timestamp 使用最需要回看的视频时间。
 5. 如果 narrative 已经足够明确，可 needs_image_review=false。
 6. 每条事项必须同时给出 video_timestamp 和 match_time。match_time 优先用比分牌/字幕/narrative 中的比赛分钟；没有明确比赛时间时可以估算，并标注 match_time_source=estimated。
-7. 不要把视频时间 01:42:08 直接写成第 102 分钟；比赛时间必须按上/下半场语境估算。
-8. 不要从 narrative 中继承球员姓名、号码、位置或身份；如果原文出现这些内容，输出时降级成球队层级。
-9. 只输出严格 JSON，不要 Markdown，不要 Thinking Process。
+7. match_time 要保留比分牌秒针：05:17 必须写成 05:17 或等价的第5分17秒，不能改写成第6分钟；90+1 可以写成 90+1'。
+8. 不要把视频时间 01:42:08 直接写成第 102 分钟；比赛时间必须按上/下半场语境估算。
+9. 不要从 narrative 中继承球员姓名、号码、位置或身份；如果原文出现这些内容，输出时降级成球队层级。
+10. 只输出严格 JSON，不要 Markdown，不要 Thinking Process。
 
 当前 chunk：
 - chunk_id: {chunk["chunk_id"]}
@@ -924,11 +927,13 @@ V4 新增前置规则：
 5. 不要新增没有候选依据的事项。
 6. 每条事项必须有 video_timestamp、match_time、period、event_type、title、certainty、evidence。
 7. match_time 用于展示；video_timestamp 用于切片。不能把视频时间直接当比赛分钟。
-8. 彻底删除或降级所有球员姓名、球衣号码、前锋/后卫/门将/中场/队长/主罚手等位置或身份信息。最多写“德国队”“库拉索队”“德国队球员”“库拉索球员”。
-9. 换人事项只写某队换人，不写上下场球员姓名。
-10. evidence 和 script_angle 必须短，单项不超过 50 个中文字符。
-11. 最多保留 {self.options.final_max_events} 条；低价值 celebration、低价值 substitution、重复定位球优先合并或剔除。
-12. 只输出严格 JSON，不要解释，不要 Markdown，不要漂亮打印，尽量单行紧凑 JSON。
+8. 读记分牌比赛钟时必须保留秒针语义：05:17 是第 5 分 17 秒，20:31 是第 20 分 31 秒，46:14 是第 46 分 14 秒；不能四舍五入成第6分钟，也不能用视频时间替代比赛时间。
+9. 如果候选证据含 FIXED_GOAL_MEMORY，goal 必须与固定进球事实一致；比分未变的回放、庆祝、进球字幕不能新增 goal。
+10. 彻底删除或降级所有球员姓名、球衣号码、前锋/后卫/门将/中场/队长/主罚手等位置或身份信息。最多写“德国队”“库拉索队”“德国队球员”“库拉索球员”。
+11. 换人事项只写某队换人，不写上下场球员姓名。
+12. evidence 和 script_angle 必须短，单项不超过 50 个中文字符。
+13. 最多保留 {self.options.final_max_events} 条；低价值 celebration、低价值 substitution、重复定位球优先合并或剔除。
+14. 只输出严格 JSON，不要解释，不要 Markdown，不要漂亮打印，尽量单行紧凑 JSON。
 
 候选事项：
 {json.dumps(candidate_pack, ensure_ascii=False, indent=2)}

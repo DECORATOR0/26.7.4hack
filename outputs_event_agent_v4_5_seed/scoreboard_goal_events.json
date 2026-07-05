@@ -1,0 +1,258 @@
+[
+  {
+    "event_id": "F0003",
+    "video_timestamp": "00:14:24",
+    "timestamp": "00:14:24",
+    "match_time": "05:17",
+    "period": "first_half",
+    "match_minute": 5,
+    "stoppage_minute": 0,
+    "match_time_source": "scoreboard_ocr",
+    "event_type": "goal",
+    "title": "德国队进球，比分变为1-0",
+    "certainty": "confirmed",
+    "evidence_level": "scoreboard_ocr",
+    "confidence": 0.98,
+    "importance": "high",
+    "source_event_ids": [
+      "g01_00864",
+      "g01_00866"
+    ],
+    "linked_event_id": "",
+    "score_after": "1-0",
+    "team": "德国",
+    "goal_timestamp_policy": "last_before_jump",
+    "score_jump_previous_timestamp": "00:14:24",
+    "score_jump_current_timestamp": "00:14:26",
+    "evidence": [
+      "记分牌比分从0-0跳变为1-0",
+      "跳变前最后OCR：比分0-0，比赛钟05:17，视频00:14:24；跳变后首次OCR：比分1-0，比赛钟05:19，视频00:14:26"
+    ],
+    "needs_more_review": false,
+    "script_angle": "德国队进球由记分牌比分跳变确认，比分变为1-0"
+  },
+  {
+    "event_id": "F0008",
+    "video_timestamp": "00:29:38",
+    "timestamp": "00:29:38",
+    "match_time": "20:31",
+    "period": "first_half",
+    "match_minute": 20,
+    "stoppage_minute": 0,
+    "match_time_source": "scoreboard_ocr",
+    "event_type": "goal",
+    "title": "库拉索队进球，比分变为1-1",
+    "certainty": "confirmed",
+    "evidence_level": "scoreboard_ocr",
+    "confidence": 0.95,
+    "importance": "high",
+    "source_event_ids": [
+      "g02_01778",
+      "g02_01800"
+    ],
+    "linked_event_id": "",
+    "score_after": "1-1",
+    "team": "库拉索",
+    "goal_timestamp_policy": "last_before_jump",
+    "score_jump_previous_timestamp": "00:29:38",
+    "score_jump_current_timestamp": "00:30:00",
+    "evidence": [
+      "记分牌比分从1-0跳变为1-1",
+      "跳变前最后OCR：比分1-0，比赛钟20:31，视频00:29:38；跳变后首次OCR：比分1-1，比赛钟20:53，视频00:30:00"
+    ],
+    "needs_more_review": false,
+    "script_angle": "库拉索队进球由记分牌比分跳变确认，比分变为1-1"
+  },
+  {
+    "event_id": "F0017",
+    "video_timestamp": "00:45:42",
+    "timestamp": "00:45:42",
+    "match_time": "37:32",
+    "period": "first_half",
+    "match_minute": 37,
+    "stoppage_minute": 0,
+    "match_time_source": "scoreboard_ocr",
+    "event_type": "goal",
+    "title": "德国队进球，比分变为2-1",
+    "certainty": "confirmed",
+    "evidence_level": "scoreboard_ocr",
+    "confidence": 0.95,
+    "importance": "high",
+    "source_event_ids": [
+      "g03_02742",
+      "g03_02744"
+    ],
+    "linked_event_id": "",
+    "score_after": "2-1",
+    "team": "德国",
+    "goal_timestamp_policy": "last_before_jump",
+    "score_jump_previous_timestamp": "00:45:42",
+    "score_jump_current_timestamp": "00:45:44",
+    "evidence": [
+      "记分牌比分从1-1跳变为2-1",
+      "跳变前最后OCR：比分1-1，比赛钟37:32，视频00:45:42；跳变后首次OCR：比分2-1，比赛钟37:34，视频00:45:44"
+    ],
+    "needs_more_review": false,
+    "script_angle": "德国队进球由记分牌比分跳变确认，比分变为2-1"
+  },
+  {
+    "event_id": "F0022",
+    "video_timestamp": "00:57:20",
+    "timestamp": "00:57:20",
+    "match_time": "49:10",
+    "period": "first_half",
+    "match_minute": 49,
+    "stoppage_minute": 0,
+    "match_time_source": "scoreboard_ocr",
+    "event_type": "goal",
+    "title": "德国队进球，比分变为3-1",
+    "certainty": "confirmed",
+    "evidence_level": "scoreboard_ocr",
+    "confidence": 0.95,
+    "importance": "high",
+    "source_event_ids": [
+      "sb_03440",
+      "g04_03442"
+    ],
+    "linked_event_id": "",
+    "score_after": "3-1",
+    "team": "德国",
+    "goal_timestamp_policy": "last_before_jump",
+    "score_jump_previous_timestamp": "00:57:20",
+    "score_jump_current_timestamp": "00:57:22",
+    "evidence": [
+      "记分牌比分从2-1跳变为3-1",
+      "跳变前最后OCR：比分2-1，比赛钟49:10，视频00:57:20；跳变后首次OCR：比分3-1，比赛钟49:12，视频00:57:22"
+    ],
+    "needs_more_review": false,
+    "script_angle": "德国队进球由记分牌比分跳变确认，比分变为3-1"
+  },
+  {
+    "event_id": "F0025",
+    "video_timestamp": "01:01:52",
+    "timestamp": "01:01:52",
+    "match_time": "46:14",
+    "period": "second_half",
+    "match_minute": 46,
+    "stoppage_minute": 0,
+    "match_time_source": "scoreboard_ocr",
+    "event_type": "goal",
+    "title": "德国队进球，比分变为4-1",
+    "certainty": "confirmed",
+    "evidence_level": "scoreboard_ocr",
+    "confidence": 0.98,
+    "importance": "high",
+    "source_event_ids": [
+      "g05_03712",
+      "g05_03714"
+    ],
+    "linked_event_id": "",
+    "score_after": "4-1",
+    "team": "德国",
+    "goal_timestamp_policy": "last_before_jump",
+    "score_jump_previous_timestamp": "01:01:52",
+    "score_jump_current_timestamp": "01:01:54",
+    "evidence": [
+      "记分牌比分从3-1跳变为4-1",
+      "跳变前最后OCR：比分3-1，比赛钟46:14，视频01:01:52；跳变后首次OCR：比分4-1，比赛钟46:16，视频01:01:54"
+    ],
+    "needs_more_review": false,
+    "script_angle": "德国队进球由记分牌比分跳变确认，比分变为4-1"
+  },
+  {
+    "event_id": "F0029",
+    "video_timestamp": "01:24:08",
+    "timestamp": "01:24:08",
+    "match_time": "71:26",
+    "period": "second_half",
+    "match_minute": 71,
+    "stoppage_minute": 0,
+    "match_time_source": "scoreboard_ocr",
+    "event_type": "goal",
+    "title": "德国队进球，比分变为5-1",
+    "certainty": "confirmed",
+    "evidence_level": "scoreboard_ocr",
+    "confidence": 0.95,
+    "importance": "high",
+    "source_event_ids": [
+      "g06_05048",
+      "g06_05152"
+    ],
+    "linked_event_id": "",
+    "score_after": "5-1",
+    "team": "德国",
+    "goal_timestamp_policy": "last_before_jump",
+    "score_jump_previous_timestamp": "01:24:08",
+    "score_jump_current_timestamp": "01:25:52",
+    "evidence": [
+      "记分牌比分从4-1跳变为5-1",
+      "跳变前最后OCR：比分4-1，比赛钟unknown，视频01:24:08；跳变后首次OCR：比分5-1，比赛钟71:26，视频01:25:52"
+    ],
+    "needs_more_review": false,
+    "script_angle": "德国队进球由记分牌比分跳变确认，比分变为5-1"
+  },
+  {
+    "event_id": "F0030",
+    "video_timestamp": "01:31:34",
+    "timestamp": "01:31:34",
+    "match_time": "77:08",
+    "period": "second_half",
+    "match_minute": 77,
+    "stoppage_minute": 0,
+    "match_time_source": "scoreboard_ocr",
+    "event_type": "goal",
+    "title": "德国队进球，比分变为6-1",
+    "certainty": "confirmed",
+    "evidence_level": "scoreboard_ocr",
+    "confidence": 0.95,
+    "importance": "high",
+    "source_event_ids": [
+      "g07_05494",
+      "g07_05496"
+    ],
+    "linked_event_id": "",
+    "score_after": "6-1",
+    "team": "德国",
+    "goal_timestamp_policy": "last_before_jump",
+    "score_jump_previous_timestamp": "01:31:34",
+    "score_jump_current_timestamp": "01:31:36",
+    "evidence": [
+      "记分牌比分从5-1跳变为6-1",
+      "跳变前最后OCR：比分5-1，比赛钟77:08，视频01:31:34；跳变后首次OCR：比分6-1，比赛钟77:10，视频01:31:36"
+    ],
+    "needs_more_review": false,
+    "script_angle": "德国队进球由记分牌比分跳变确认，比分变为6-1"
+  },
+  {
+    "event_id": "F0034",
+    "video_timestamp": "01:42:16",
+    "timestamp": "01:42:16",
+    "match_time": "87:50",
+    "period": "second_half",
+    "match_minute": 87,
+    "stoppage_minute": 0,
+    "match_time_source": "scoreboard_ocr",
+    "event_type": "goal",
+    "title": "德国队进球，比分变为7-1",
+    "certainty": "confirmed",
+    "evidence_level": "scoreboard_ocr",
+    "confidence": 0.95,
+    "importance": "high",
+    "source_event_ids": [
+      "g08_06136",
+      "g08_06138"
+    ],
+    "linked_event_id": "",
+    "score_after": "7-1",
+    "team": "德国",
+    "goal_timestamp_policy": "last_before_jump",
+    "score_jump_previous_timestamp": "01:42:16",
+    "score_jump_current_timestamp": "01:42:18",
+    "evidence": [
+      "记分牌比分从6-1跳变为7-1",
+      "跳变前最后OCR：比分6-1，比赛钟87:50，视频01:42:16；跳变后首次OCR：比分7-1，比赛钟87:52，视频01:42:18"
+    ],
+    "needs_more_review": false,
+    "script_angle": "德国队进球由记分牌比分跳变确认，比分变为7-1"
+  }
+]

@@ -276,16 +276,34 @@ def _sanitize_identity_text(value: Any) -> str:
         "ADEYEMI",
         "WIRTZ",
         "MUSIALA",
+        "MUSTIALA",
         "KIMMICH",
         "SANE",
         "SANÉ",
         "Sané",
         "Sane",
         "HAVERTZ",
+        "SCHLOTTERBECK",
         "BROWN",
         "ANTON",
+        "UNDAV",
+        "MARGARITHA",
+        "LOCADIA",
+        "TAH",
+        "GORETZKA",
+        "RÜDIGER",
+        "RUDIGER",
+        "RAUM",
         "BACUNA",
         "L. Bacuna",
+        "ANTONISSE",
+        "KASTANEER",
+        "CHONG",
+        "Antonisse",
+        "Kastaneer",
+        "Chong",
+        "Schlotterbeck",
+        "翁达夫",
     ]
     for name in player_names:
         if re.search(r"[A-Za-z]", name):
@@ -311,8 +329,10 @@ def _sanitize_identity_text(value: Any) -> str:
 
     text = re.sub(r"#\s*\d{1,2}\b", "球员", text)
     text = re.sub(r"\d{1,2}\s*号(?:球员)?", "球员", text)
+    text = re.sub(r"(?:红色|绿色)?数字\s*\d{1,3}", "数字", text)
     text = re.sub(r"\(\s*\d{1,2}\s*\)", "", text)
     text = re.sub(r"\b[A-Z][a-zÀ-ÿ'’.-]+(?:\s+[A-Z][a-zÀ-ÿ'’.-]+)+\b", "球员", text)
+    text = text.replace("球员球员", "球员")
     text = re.sub(r"\s+", " ", text).strip()
     return text
 

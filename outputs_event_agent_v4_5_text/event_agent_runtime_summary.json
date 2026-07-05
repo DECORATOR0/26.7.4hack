@@ -1,0 +1,13 @@
+{
+  "text_chunks": 10,
+  "text_success": 10,
+  "text_candidate_events": 71,
+  "image_review_calls": 52,
+  "image_review_success": 52,
+  "final_events": 65,
+  "prompt_tokens": 574322,
+  "completion_tokens": 52225,
+  "total_tokens": 626547,
+  "concurrency": 3,
+  "rpm_limit": 12.0
+}

@@ -145,7 +145,7 @@ class FrameNarrationRunner:
     def _request_fingerprint(self, segment: dict[str, Any]) -> str:
         payload = {
             "stage": "frame_narration",
-            "prompt_version": "v4_4_goal_memory_ocr_score_panel" if segment.get("fixed_goal_memory") else "v4_ocr_score_panel",
+            "prompt_version": "v4_5_goal_memory_ocr_score_panel" if segment.get("fixed_goal_memory") else "v4_5_ocr_score_panel",
             "max_tokens": self.options.max_tokens,
             "temperature": self.options.temperature,
             "segment": segment,
@@ -200,7 +200,7 @@ class FrameNarrationRunner:
             "ok": parse_error is None and finish_reason != "length",
             "request_fingerprint": request_fingerprint,
             "request_max_tokens": self.options.max_tokens,
-            "prompt_version": "v4_4_goal_memory_ocr_score_panel" if segment.get("fixed_goal_memory") else "v4_ocr_score_panel",
+            "prompt_version": "v4_5_goal_memory_ocr_score_panel" if segment.get("fixed_goal_memory") else "v4_5_ocr_score_panel",
             "elapsed_seconds": round(time.time() - started, 3),
             "usage": response.raw.get("usage"),
             "finish_reason": finish_reason,
@@ -221,17 +221,18 @@ class FrameNarrationRunner:
         goal_memory_block = ""
         if fixed_memory:
             goal_memory_block = f"""
-V4.4 固定进球记忆：
+V4.5 固定进球记忆：
 {fixed_memory}
 
 本段固定事实：
 {local_facts or "- 本段没有固定进球事实。"}
 
 硬约束：
-1. 只有 V4.4 固定进球记忆中的 8 个进球可以被描述为新进球。
+1. 只有 V4.5 固定进球记忆中的 8 个进球可以被描述为新进球。
 2. 如果本段固定事实包含进球，你必须在 segment_summary、score_panel_summary、observations 和 event_candidates 中如实写入该进球事实。
 3. 如果画面出现回放、庆祝、进球信息条、球员特写或比分未变化画面，不能新增 goal，只能写 replay/celebration/scoreboard/unknown。
 4. 进球事实里的视频时间、比赛钟、球队、比分是先验事实，不允许改写。
+5. 读比分牌比赛钟必须保留秒针：05:17 是第 5 分 17 秒，20:31 是第 20 分 31 秒；不要写成第6分钟或第21分钟。
 """
         return f"""你会看到一段足球转播视频中按时间排序的抽帧。该段约 1 分钟，通常每 2 秒一帧。
 
@@ -265,9 +266,10 @@ V4.4 固定进球记忆：
 约束：
 1. 不要编造球员姓名；只有画面字幕清楚出现时才可记录。
 2. 不要把赛前入场、阵容展示误写成比赛事件。
-3. 不确定时写“疑似”，并降低 confidence。
-4. 每条 observation 必须绑定给定帧的 timestamp。
-5. 输出严格 JSON，不要 Markdown，不要 Thinking Process。
+3. 比分牌上的比赛钟必须按 MM:SS 原样理解并记录；不要把视频时间当比赛时间，不要把 05:17 近似写成第6分钟。
+4. 不确定时写“疑似”，并降低 confidence。
+5. 每条 observation 必须绑定给定帧的 timestamp。
+6. 输出严格 JSON，不要 Markdown，不要 Thinking Process。
 
 输出格式：
 {{
@@ -531,7 +533,7 @@ def _format_local_fixed_facts(facts: list[dict[str, Any]]) -> str:
 def _goal_memory_report(memory: list[dict[str, Any]], segments: list[dict[str, Any]]) -> str:
     injected_segments = [item for item in segments if item.get("fixed_facts")]
     lines = [
-        "# V4.4 Frame Narration Goal Memory",
+        "# V4.5 Frame Narration Goal Memory",
         "",
         f"- Fixed goal facts: {len(memory)}",
         f"- Segments with local facts: {len(injected_segments)}",
