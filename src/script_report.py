@@ -688,7 +688,7 @@ def _v4_3_markdown(
             "```text",
             f"【镜头/画面提示】：全场全景，比分牌显示 {match_name}",
             "解说员：",
-            f"“欢迎来到世界杯赛场！{match_name}，这场比赛的节奏从一开始就被德国队的压迫拉高，库拉索也在寻找反击和定位球机会。{version_label} 会把每一次比分变化锁定在记分牌跳变上，让关键节点更稳。”",
+            f"“各位球迷朋友，欢迎来到世界杯赛场！{match_name}，哨声一响，比赛的火药味就被拉起来了。德国队想用压迫把节奏踩到底，库拉索也在等待反击和定位球的爆点。接下来每一次射门、每一次定位球、每一次比分跳动，都可能把现场彻底点燃。”",
             "```",
             "",
             "### 关键进程",
@@ -728,7 +728,7 @@ def _v4_3_markdown(
     lines.extend(["", "---", "", "## 第三部分：多语言解说脚本", ""])
     lines.extend(_v4_3_multilingual(groups, final_score))
     lines.extend(["", "---", "", "## 第四部分：配音脚本", ""])
-    lines.extend(_v4_3_voiceover(groups, final_score))
+    lines.extend(_v4_3_voiceover(groups, final_score, version_label))
     lines.extend(["", "---", "", "## 第五部分：字幕脚本", ""])
     lines.extend(_v4_3_subtitle_blocks(events, final_score))
     lines.extend(["", "---", "", "## 第六部分：集锦讲解脚本（3分钟版）", ""])
@@ -834,22 +834,25 @@ def _v4_3_single_event_script(event: dict[str, Any]) -> str:
     event_type = str(event.get("event_type") or "")
     minute = _display_minute(event)
     title = _sanitize_identity_text(str(event.get("title") or "关键事件"))
-    description = _v4_3_description(event)
+    description = _v4_5_broadcast_detail(event)
     score = str(event.get("score_after") or "")
     if event_type == "goal":
         score_text = f"，比分来到 {score}" if score else ""
-        return f"{minute}，球进了！{title}{score_text}。{description}这次进球由记分牌比分跳变确认，节点更稳。"
+        team = _v4_5_event_team_name(event)
+        return f"{minute}，漂亮！球进了！{team}把这一波攻势打成了进球{score_text}！这一下把现场情绪完全点燃，比赛走势立刻有了新的重量。{description}"
     if event_type == "penalty":
         return f"{minute}，点球相关判罚出现，比赛瞬间紧张起来。{description}"
     if event_type in {"corner", "free_kick"}:
-        return f"{minute}，定位球机会来了，双方站位都被拉进危险区域。{description}"
+        return f"{minute}，定位球机会来了！禁区里的站位一下紧起来，下一脚处理随时可能把局面推向高潮。{description}"
     if event_type in {"foul_card_dispute", "offside"}:
-        return f"{minute}，裁判判罚成为焦点，比赛节奏短暂停顿。{description}"
+        return f"{minute}，哨声响起，裁判判罚成为焦点！这次身体接触让比赛节奏被猛地拧紧。{description}"
     if event_type == "substitution":
-        return f"{minute}，场边出现人员调整，球队试图改变节奏。{description}"
+        return f"{minute}，场边开始调整！换人信号一出现，比赛进入重新布置节奏的阶段。{description}"
     if event_type == "half_full_time":
         return f"{minute}，阶段哨响，比赛节点被定格。{description}"
-    return f"{minute}，关键画面出现：{title}。{description}"
+    if event_type == "shot_chance":
+        return f"{minute}，攻势来了！{title}。这次射门把门前警报拉响，比赛速度一下提起来。{description}"
+    return f"{minute}，关键画面出现：{title}。这一下把比赛温度继续往上推。{description}"
 
 
 def _v4_3_group_heading(group: list[dict[str, Any]]) -> str:
@@ -883,12 +886,17 @@ def _v4_3_group_script(group: list[dict[str, Any]]) -> str:
     first = group[0]
     minute = _display_minute(first)
     kinds = _v4_3_group_kind(group)
-    details = "；".join(_v4_3_description(event) for event in group[:3])
+    details = "；".join(_v4_5_broadcast_detail(event).rstrip("。") for event in group[:3] if _v4_5_broadcast_detail(event))
     if any(event.get("event_type") == "goal" for event in group):
         goal = next(event for event in group if event.get("event_type") == "goal")
         score = f"，比分来到 {goal.get('score_after')}" if goal.get("score_after") else ""
-        return f"{minute}，这一串攻势被串成一个进球节点！{_v4_3_group_title(group)}{score}。{details}"
-    return f"{minute}，{kinds}连续出现，比赛节奏被这一组画面推高。{details}"
+        team = _v4_5_event_team_name(goal)
+        return f"{minute}，漂亮！球进了！{team}把这一波攻势打成了进球{score}！这一下把现场情绪完全点燃，进攻推进、门前终结和连续画面连在一起，比赛走势立刻有了新的重量。{details}。"
+    if any(event.get("event_type") in {"corner", "free_kick"} for event in group):
+        return f"{minute}，这一段比赛的火药味上来了！{kinds}连续出现，禁区前后的站位和落点争夺都在升温。{details}。"
+    if any(event.get("event_type") == "shot_chance" for event in group):
+        return f"{minute}，攻势一波接一波压上来！{kinds}连续出现，门前警报不断被拉响。{details}。"
+    return f"{minute}，{kinds}连续出现，比赛节奏被这一组画面推高，现场张力继续累积。{details}。"
 
 
 def _v4_5_plain_group_script(group: list[dict[str, Any]]) -> str:
@@ -990,20 +998,26 @@ def _v4_3_multilingual(groups: list[list[dict[str, Any]]], final_score: str) -> 
     return lines
 
 
-def _v4_3_voiceover(groups: list[list[dict[str, Any]]], final_score: str) -> list[str]:
+def _voiceover_time_range(start: int, end: int) -> str:
+    return f"[{start // 60:02d}:{start % 60:02d}-{end // 60:02d}:{end % 60:02d}]"
+
+
+def _v4_3_voiceover(groups: list[list[dict[str, Any]]], final_score: str, version_label: str = "V4.3") -> list[str]:
     selected = groups[:6]
     lines = ["### 60 秒精简版", "", "```text", "[00:00-00:05] 各位球迷朋友，德国对阵库拉索，关键片段马上开始！"]
     for index, group in enumerate(selected, start=1):
         start = index * 5
         end = start + 5
-        lines.append(f"[00:{start:02d}-00:{end:02d}] {_v4_3_short_line(group)}")
-    lines.extend([f"[00:{(len(selected)+1)*5:02d}-00:{(len(selected)+2)*5:02d}] 终场比分 {final_score}，进球全部按记分牌跳变确认。", "```", ""])
+        lines.append(f"{_voiceover_time_range(start, end)} {_v4_3_short_line(group)}")
+    close_start = (len(selected) + 1) * 5
+    close_end = close_start + 5
+    lines.extend([f"{_voiceover_time_range(close_start, close_end)} 终场比分 {final_score}，进球全部按记分牌跳变确认。", "```", ""])
     lines.extend(["### 90 秒完整版", "", "```text", "[00:00-00:10] 各位球迷朋友，欢迎来到这段世界杯关键回合！"])
     for index, group in enumerate(selected, start=1):
         start = 10 + (index - 1) * 12
         end = start + 12
-        lines.append(f"[00:{start:02d}-00:{end:02d}] {_v4_3_group_script(group)}")
-    lines.extend([f"[01:25-01:30] 比分定格在 {final_score}，这就是 V4.3 的关键事件脉络。", "```"])
+        lines.append(f"{_voiceover_time_range(start, end)} {_v4_3_group_script(group)}")
+    lines.extend([f"[01:25-01:30] 比分定格在 {final_score}，这就是 {version_label} 的关键事件脉络。", "```"])
     return lines
 
 
@@ -1090,6 +1104,32 @@ def _v4_3_final_score(events: list[dict[str, Any]], match_info: dict[str, Any]) 
         if score:
             return str(score)
     return str(match_info.get("expected_score") or "未知")
+
+
+def _v4_5_event_team_name(event: dict[str, Any]) -> str:
+    text = f"{event.get('team') or ''} {event.get('title') or ''} {event.get('evidence') or ''}"
+    if "库拉索" in text:
+        return "库拉索队"
+    if "德国" in text:
+        return "德国队"
+    team = str(event.get("team") or "").strip()
+    return team or "进攻方"
+
+
+def _v4_5_broadcast_detail(event: dict[str, Any]) -> str:
+    event_type = str(event.get("event_type") or "")
+    if event_type == "goal":
+        return "比分已经被记分牌锁定，现场气势被这一球彻底带起来。"
+    description = _v4_3_description(event)
+    if not description:
+        return ""
+    blocked_terms = ("OCR", "ocr", "记分牌比分", "跳变前", "跳变后", "比赛钟", "scoreboard")
+    parts = [part.strip() for part in re.split(r"[；;]", description) if part.strip()]
+    parts = [part for part in parts if not any(term in part for term in blocked_terms)]
+    text = "；".join(parts[:2]).strip() if parts else description
+    if text and not text.endswith(("。", "！", "？")):
+        text += "。"
+    return text
 
 
 def _v4_3_description(event: dict[str, Any]) -> str:
