@@ -18,6 +18,7 @@ from .io_utils import ensure_dir, extract_json_object, image_to_data_url, read_j
 class FrameNarrationOptions:
     frame_index_path: Path
     out_dir: Path
+    goal_memory_path: Path | None = None
     segment_seconds: float = 60.0
     max_images: int = 30
     concurrency: int = 3
@@ -39,6 +40,11 @@ class FrameNarrationRunner:
     def run(self) -> Path:
         frames = read_json(self.options.frame_index_path)
         segments = self._build_segments(frames)
+        goal_memory = _load_goal_memory(self.options.goal_memory_path)
+        if goal_memory:
+            segments = _attach_goal_memory_to_segments(segments, goal_memory)
+            write_json(self.out_dir / "goal_memory.json", goal_memory)
+            write_text(self.out_dir / "goal_memory_report.md", _goal_memory_report(goal_memory, segments))
         if self.options.max_segments:
             segments = segments[: self.options.max_segments]
         write_json(self.out_dir / "segment_plan.json", segments)
@@ -139,7 +145,7 @@ class FrameNarrationRunner:
     def _request_fingerprint(self, segment: dict[str, Any]) -> str:
         payload = {
             "stage": "frame_narration",
-            "prompt_version": "v4_ocr_score_panel",
+            "prompt_version": "v4_4_goal_memory_ocr_score_panel" if segment.get("fixed_goal_memory") else "v4_ocr_score_panel",
             "max_tokens": self.options.max_tokens,
             "temperature": self.options.temperature,
             "segment": segment,
@@ -194,7 +200,7 @@ class FrameNarrationRunner:
             "ok": parse_error is None and finish_reason != "length",
             "request_fingerprint": request_fingerprint,
             "request_max_tokens": self.options.max_tokens,
-            "prompt_version": "v4_ocr_score_panel",
+            "prompt_version": "v4_4_goal_memory_ocr_score_panel" if segment.get("fixed_goal_memory") else "v4_ocr_score_panel",
             "elapsed_seconds": round(time.time() - started, 3),
             "usage": response.raw.get("usage"),
             "finish_reason": finish_reason,
@@ -210,6 +216,23 @@ class FrameNarrationRunner:
             f"- FRAME {frame['frame_index']}: {frame['timestamp']} motion={frame.get('motion_score')}"
             for frame in segment["frames"]
         )
+        fixed_memory = _format_fixed_goal_memory(segment.get("fixed_goal_memory") or [])
+        local_facts = _format_local_fixed_facts(segment.get("fixed_facts") or [])
+        goal_memory_block = ""
+        if fixed_memory:
+            goal_memory_block = f"""
+V4.4 固定进球记忆：
+{fixed_memory}
+
+本段固定事实：
+{local_facts or "- 本段没有固定进球事实。"}
+
+硬约束：
+1. 只有 V4.4 固定进球记忆中的 8 个进球可以被描述为新进球。
+2. 如果本段固定事实包含进球，你必须在 segment_summary、score_panel_summary、observations 和 event_candidates 中如实写入该进球事实。
+3. 如果画面出现回放、庆祝、进球信息条、球员特写或比分未变化画面，不能新增 goal，只能写 replay/celebration/scoreboard/unknown。
+4. 进球事实里的视频时间、比赛钟、球队、比分是先验事实，不允许改写。
+"""
         return f"""你会看到一段足球转播视频中按时间排序的抽帧。该段约 1 分钟，通常每 2 秒一帧。
 
 本场比赛固定信息：
@@ -218,6 +241,7 @@ class FrameNarrationRunner:
 - CURAÇAO、CURACAO、Curaçao、库拉索都指库拉索。
 - 禁止把库拉索误写成哥伦比亚、委内瑞拉或其他第三方国家队。
 - 如果画面或比分牌看不清队名，只能写“德国球员”“库拉索球员”或 unknown，不要猜新队名。
+{goal_memory_block}
 
 本段信息：
 - segment_id: {segment['segment_id']}
@@ -357,3 +381,177 @@ class FrameNarrationRunner:
             "concurrency": self.options.concurrency,
             "rpm_limit": self.options.rpm_limit,
         }
+
+
+def _load_goal_memory(path: Path | None) -> list[dict[str, Any]]:
+    if path is None:
+        return []
+    if not path.exists():
+        raise FileNotFoundError(f"Goal memory file not found: {path}")
+    data = read_json(path)
+    if isinstance(data, dict):
+        raw_items = data.get("scoreboard_goal_events") or data.get("final_events") or data.get("events") or []
+    elif isinstance(data, list):
+        raw_items = data
+    else:
+        raw_items = []
+
+    goals: list[dict[str, Any]] = []
+    for item in raw_items:
+        if not isinstance(item, dict):
+            continue
+        if item.get("event_type") not in (None, "", "goal"):
+            continue
+        video_timestamp = item.get("video_timestamp") or item.get("timestamp") or item.get("start")
+        if not video_timestamp:
+            continue
+        goals.append(_goal_memory_item(item, len(goals) + 1, str(video_timestamp)))
+
+    goals.sort(key=lambda fact: float(fact.get("video_time_sec") or 0.0))
+    for index, fact in enumerate(goals, start=1):
+        fact["goal_index"] = index
+        if not fact.get("event_id"):
+            fact["event_id"] = f"G{index:02d}"
+        fact["fixed_fact_text"] = _fixed_fact_text(fact)
+    return goals
+
+
+def _goal_memory_item(goal: dict[str, Any], index: int, video_timestamp: str) -> dict[str, Any]:
+    evidence = goal.get("evidence") if isinstance(goal.get("evidence"), list) else []
+    return {
+        "goal_index": index,
+        "event_id": goal.get("event_id") or f"G{index:02d}",
+        "video_timestamp": video_timestamp,
+        "video_time_sec": timestamp_to_seconds(video_timestamp),
+        "match_time": goal.get("match_time") or goal.get("clock"),
+        "period": goal.get("period"),
+        "team": goal.get("team"),
+        "score_after": goal.get("score_after"),
+        "title": goal.get("title"),
+        "confidence": goal.get("confidence"),
+        "source": "scoreboard_ocr_score_jump",
+        "evidence": evidence,
+        "score_jump_evidence": " ; ".join(str(item) for item in evidence[:2]),
+    }
+
+
+def _fixed_fact_text(fact: dict[str, Any]) -> str:
+    return (
+        f"FIXED_GOAL_FACT G{int(fact.get('goal_index') or 0):02d}: "
+        f"video_time={fact.get('video_timestamp')}, "
+        f"match_clock={fact.get('match_time') or 'unknown'}, "
+        f"team={fact.get('team') or 'unknown'}, "
+        f"score_after={fact.get('score_after') or 'unknown'}. "
+        "Source: scoreboard OCR score jump. This fact is mandatory."
+    )
+
+
+def _attach_goal_memory_to_segments(
+    segments: list[dict[str, Any]],
+    memory: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    attached: list[dict[str, Any]] = []
+    for raw in segments:
+        segment = dict(raw)
+        segment["fixed_goal_memory"] = memory
+        local_facts = _facts_for_segment(segment, memory, segments)
+        if local_facts:
+            segment["fixed_facts"] = local_facts
+        attached.append(segment)
+    return attached
+
+
+def _facts_for_segment(
+    segment: dict[str, Any],
+    memory: list[dict[str, Any]],
+    all_segments: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    start = float(segment.get("start_seconds") or timestamp_to_seconds(segment.get("start")))
+    end = float(segment.get("end_seconds") or timestamp_to_seconds(segment.get("end")))
+    facts = [
+        fact
+        for fact in memory
+        if start <= float(fact.get("video_time_sec") or 0.0) < max(start, end)
+    ]
+    if facts:
+        return facts
+
+    attached: list[dict[str, Any]] = []
+    for fact in memory:
+        goal_sec = float(fact.get("video_time_sec") or 0.0)
+        if _direct_segment_id(goal_sec, all_segments):
+            continue
+        nearest = min(
+            all_segments,
+            key=lambda item: _segment_distance(
+                goal_sec,
+                float(item.get("start_seconds") or timestamp_to_seconds(item.get("start"))),
+                float(item.get("end_seconds") or timestamp_to_seconds(item.get("end"))),
+            ),
+        )
+        if nearest.get("segment_id") == segment.get("segment_id"):
+            if _segment_distance(goal_sec, start, end) <= 30:
+                attached.append(fact)
+    return attached
+
+
+def _direct_segment_id(value: float, segments: list[dict[str, Any]]) -> str | None:
+    for segment in segments:
+        start = float(segment.get("start_seconds") or timestamp_to_seconds(segment.get("start")))
+        end = float(segment.get("end_seconds") or timestamp_to_seconds(segment.get("end")))
+        if start <= value < max(start, end):
+            return str(segment.get("segment_id") or "")
+    return None
+
+
+def _segment_distance(value: float, start: float, end: float) -> float:
+    if start <= value <= end:
+        return 0.0
+    return min(abs(value - start), abs(value - end))
+
+
+def _format_fixed_goal_memory(memory: list[dict[str, Any]]) -> str:
+    if not memory:
+        return ""
+    lines = []
+    for fact in memory:
+        lines.append(f"- {fact.get('fixed_fact_text') or fact}")
+    return "\n".join(lines)
+
+
+def _format_local_fixed_facts(facts: list[dict[str, Any]]) -> str:
+    if not facts:
+        return ""
+    lines = []
+    for fact in facts:
+        lines.append(f"- {fact.get('fixed_fact_text') or fact}")
+    return "\n".join(lines)
+
+
+def _goal_memory_report(memory: list[dict[str, Any]], segments: list[dict[str, Any]]) -> str:
+    injected_segments = [item for item in segments if item.get("fixed_facts")]
+    lines = [
+        "# V4.4 Frame Narration Goal Memory",
+        "",
+        f"- Fixed goal facts: {len(memory)}",
+        f"- Segments with local facts: {len(injected_segments)}",
+        "",
+        "| # | Video Time | Match Time | Team | Score | Segment |",
+        "|---:|---|---|---|---|---|",
+    ]
+    for fact in memory:
+        segment = next(
+            (
+                item
+                for item in injected_segments
+                if any(local.get("goal_index") == fact.get("goal_index") for local in item.get("fixed_facts") or [])
+            ),
+            {},
+        )
+        lines.append(
+            f"| {fact.get('goal_index')} | {fact.get('video_timestamp')} | {fact.get('match_time')} | "
+            f"{fact.get('team')} | {fact.get('score_after')} | "
+            f"{segment.get('segment_id') or ''} {segment.get('start') or ''}-{segment.get('end') or ''} |"
+        )
+    lines.append("")
+    return "\n".join(lines)

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import http.client
+import socket
 import time
 import urllib.error
 import urllib.request
@@ -72,6 +74,10 @@ class InternClient:
             except urllib.error.URLError as exc:
                 if attempt >= self.max_retries:
                     raise RuntimeError(f"Intern-S2 request failed: {exc}") from exc
+                last_error = exc
+            except (http.client.RemoteDisconnected, TimeoutError, ConnectionError, socket.timeout) as exc:
+                if attempt >= self.max_retries:
+                    raise RuntimeError(f"Intern-S2 connection failed: {exc}") from exc
                 last_error = exc
             time.sleep(min(2 ** attempt, 8))
         else:

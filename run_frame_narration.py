@@ -10,6 +10,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Convert sampled football frames into textual observations")
     parser.add_argument("--frame-index", required=True, help="Path to 2-second frame_index JSON")
     parser.add_argument("--out", default="outputs_frame_narration", help="Output directory")
+    parser.add_argument("--goal-memory", default=None, help="Optional OCR scoreboard goal facts to inject before narration")
     parser.add_argument("--segment-seconds", type=float, default=60.0, help="Seconds per narration segment")
     parser.add_argument("--max-images", type=int, default=30, help="Max images per segment request")
     parser.add_argument("--concurrency", type=int, default=3, help="Concurrent API requests")
@@ -27,6 +28,7 @@ def main() -> None:
     options = FrameNarrationOptions(
         frame_index_path=Path(args.frame_index),
         out_dir=Path(args.out),
+        goal_memory_path=Path(args.goal_memory) if args.goal_memory else None,
         segment_seconds=args.segment_seconds,
         max_images=args.max_images,
         concurrency=max(1, args.concurrency),

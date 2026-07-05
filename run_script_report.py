@@ -13,7 +13,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--match-info", default=None, help="Optional match info JSON")
     parser.add_argument("--temperature", type=float, default=0.2)
     parser.add_argument("--max-tokens", type=int, default=10000, help="Max output tokens for the report")
-    parser.add_argument("--report-version", choices=["v2", "v3", "v3_markdown", "v4_markdown"], default="v2", help="Report output schema")
+    parser.add_argument(
+        "--report-version",
+        choices=["v2", "v3", "v3_markdown", "v4_markdown", "v4_3_markdown", "v4_4_markdown"],
+        default="v2",
+        help="Report output schema",
+    )
     parser.add_argument("--pure-model-output", action="store_true", help="Write report content directly from the model")
     parser.add_argument("--no-model", action="store_true", help="Write deterministic fallback report without API")
     return parser.parse_args()

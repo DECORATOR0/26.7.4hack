@@ -1,0 +1,504 @@
+{
+  "findings": [
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0004",
+      "video_timestamp": "00:17:14",
+      "match_time": "8'",
+      "field": "script_angle",
+      "original_value": "德国队在第8分钟再次射门，但被库拉索门将成功化解",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0004",
+      "video_timestamp": "00:17:14",
+      "match_time": "8'",
+      "field": "evidence",
+      "original_value": "德国队球员在禁区内射门，库拉索门将做出扑救动作",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0004",
+      "video_timestamp": "00:17:14",
+      "match_time": "8'",
+      "field": "title",
+      "original_value": "德国队射门被库拉索门将扑出",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0005",
+      "video_timestamp": "00:19:26",
+      "match_time": "10'",
+      "field": "script_angle",
+      "original_value": "德国队第10分钟射门，但被库拉索门将成功扑出，未能扩大比分",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0005",
+      "video_timestamp": "00:19:26",
+      "match_time": "10'",
+      "field": "evidence",
+      "original_value": "德国球员Sané在禁区右侧起脚射门，库拉索门将做出扑救动作",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0005",
+      "video_timestamp": "00:19:26",
+      "match_time": "10'",
+      "field": "title",
+      "original_value": "德国队射门被库拉索门将扑出",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0006",
+      "video_timestamp": "00:20:46",
+      "match_time": "11'",
+      "field": "script_angle",
+      "original_value": "德国队第11分钟再次获得射门机会，但被库拉索门将飞身扑出，未能改写比分",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0006",
+      "video_timestamp": "00:20:46",
+      "match_time": "11'",
+      "field": "evidence",
+      "original_value": "德国队进攻至库拉索禁区前沿，一名德国球员在禁区弧顶附近接球后起脚射门，库拉索门将飞身将球扑出",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0006",
+      "video_timestamp": "00:20:46",
+      "match_time": "11'",
+      "field": "title",
+      "original_value": "德国队球员射门被库拉索门将扑出",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0008",
+      "video_timestamp": "00:23:12",
+      "match_time": "14:05",
+      "field": "script_angle",
+      "original_value": "德国队获得一次射门机会，但被库拉索门将成功化解",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0008",
+      "video_timestamp": "00:23:12",
+      "match_time": "14:05",
+      "field": "evidence",
+      "original_value": "德国队球员在禁区附近起脚射门，库拉索门将做出扑救动作并成功将球扑出",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0008",
+      "video_timestamp": "00:23:12",
+      "match_time": "14:05",
+      "field": "title",
+      "original_value": "德国队射门被库拉索门将扑出",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0009",
+      "video_timestamp": "00:27:54",
+      "match_time": "17:47",
+      "field": "evidence",
+      "original_value": "库拉索队球员在禁区附近尝试射门，德国队门将和防守球员成功化解",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0012",
+      "video_timestamp": "00:31:00",
+      "match_time": "20:31",
+      "field": "script_angle",
+      "original_value": "库拉索队替补席庆祝进球，教练和球员情绪激动",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0012",
+      "video_timestamp": "00:31:00",
+      "match_time": "20:31",
+      "field": "evidence",
+      "original_value": "库拉索队替补席庆祝进球，教练和球员情绪激动",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0012",
+      "video_timestamp": "00:31:00",
+      "match_time": "20:31",
+      "field": "title",
+      "original_value": "库拉索队替补席庆祝",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0016",
+      "video_timestamp": "00:36:12",
+      "match_time": "27:50",
+      "field": "script_angle",
+      "original_value": "德国队射门被库拉索门将扑救",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0016",
+      "video_timestamp": "00:36:12",
+      "match_time": "27:50",
+      "field": "evidence",
+      "original_value": "德国队球员在禁区右侧尝试射门，库拉索门将做出扑救动作",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0016",
+      "video_timestamp": "00:36:12",
+      "match_time": "27:50",
+      "field": "title",
+      "original_value": "德国队射门被库拉索门将扑救",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0025",
+      "video_timestamp": "00:57:20",
+      "match_time": "48:52",
+      "field": "evidence",
+      "original_value": "德国球员主罚任意球，皮球越过人墙飞向球门，库拉索门将扑救未果，比分牌更新为德国3-1库拉索",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0031",
+      "video_timestamp": "01:05:00",
+      "match_time": "49:22",
+      "field": "script_angle",
+      "original_value": "德国队在前场获得任意球机会，库拉索门将成功将球扑出",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0034",
+      "video_timestamp": "01:14:36",
+      "match_time": "58:00",
+      "field": "script_angle",
+      "original_value": "德国队远射，库拉索门将做出扑救动作，球被扑出",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0034",
+      "video_timestamp": "01:14:36",
+      "match_time": "58:00",
+      "field": "evidence",
+      "original_value": "德国队球员在禁区外起脚远射，球在空中飞行，库拉索门将扑救射门",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0034",
+      "video_timestamp": "01:14:36",
+      "match_time": "58:00",
+      "field": "title",
+      "original_value": "德国队远射被门将扑救",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0037",
+      "video_timestamp": "01:19:06",
+      "match_time": "63:28",
+      "field": "script_angle",
+      "original_value": "德国队换人，Musiala被Undav替换下场",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0037",
+      "video_timestamp": "01:19:06",
+      "match_time": "63:28",
+      "field": "evidence",
+      "original_value": "第四官员举起换人牌，显示换下10号，换上26号，德国队球员Undav站在旁边",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0038",
+      "video_timestamp": "01:19:36",
+      "match_time": "63:56",
+      "field": "evidence",
+      "original_value": "第四官员再次举起换人牌，显示换下9号，换上16号，库拉索队球员Margaritha站在旁边",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0039",
+      "video_timestamp": "01:23:20",
+      "match_time": "68'",
+      "field": "evidence",
+      "original_value": "德国队球员射门，球越过门将入网，球员开始庆祝，背景大屏幕短暂显示比分5-1",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0040",
+      "video_timestamp": "01:24:08",
+      "match_time": "71:26",
+      "field": "evidence",
+      "original_value": "视频时间01:24:08处球入网，门将扑救失败，VAR回放确认无越位",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0042",
+      "video_timestamp": "01:27:02",
+      "match_time": "72:34",
+      "field": "evidence",
+      "original_value": "换人信息显示Nmecha被Tah替换，Goretzka被Rüdiger替换，Raum被Brown替换",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0044",
+      "video_timestamp": "01:32:16",
+      "match_time": "78:16",
+      "field": "evidence",
+      "original_value": "进球瞬间球入网，门将扑救失败，球员庆祝，观众欢呼，比分牌后续更新显示UNDAY 78'进球",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0046",
+      "video_timestamp": "01:36:04",
+      "match_time": "81:38",
+      "field": "script_angle",
+      "original_value": "库拉索队射门被德国队门将扑出，比赛继续",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0046",
+      "video_timestamp": "01:36:04",
+      "match_time": "81:38",
+      "field": "evidence",
+      "original_value": "球被德国队球员解围后，库拉索球员在禁区外尝试射门，球被德国队门将扑出",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0046",
+      "video_timestamp": "01:36:04",
+      "match_time": "81:38",
+      "field": "title",
+      "original_value": "库拉索队射门被德国队门将扑出",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0047",
+      "video_timestamp": "01:36:20",
+      "match_time": "81:54",
+      "field": "script_angle",
+      "original_value": "库拉索队进行换人，19号球员被换下，21号球员替补上场",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0047",
+      "video_timestamp": "01:36:20",
+      "match_time": "81:54",
+      "field": "evidence",
+      "original_value": "裁判举起换人牌，显示库拉索队19号球员被换下，21号球员替补上场，比分牌显示比赛时间81:54",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0048",
+      "video_timestamp": "01:37:04",
+      "match_time": "82:34",
+      "field": "script_angle",
+      "original_value": "德国队进行换人，Kimmich被Anton替换",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0048",
+      "video_timestamp": "01:37:04",
+      "match_time": "82:34",
+      "field": "evidence",
+      "original_value": "屏幕左下角出现明确换人信息条，显示Kimmich被Anton替换，且球员Anton走向场内，比分牌显示比赛时间82:34",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0049",
+      "video_timestamp": "01:38:26",
+      "match_time": "83:20",
+      "field": "script_angle",
+      "original_value": "德国队射门被库拉索门将扑出，比赛继续",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0049",
+      "video_timestamp": "01:38:26",
+      "match_time": "83:20",
+      "field": "evidence",
+      "original_value": "回放显示德国队球员在禁区外射门，球被库拉索门将扑出，比分牌显示比赛时间83:20",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0049",
+      "video_timestamp": "01:38:26",
+      "match_time": "83:20",
+      "field": "title",
+      "original_value": "德国队射门被库拉索门将扑出",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0050",
+      "video_timestamp": "01:39:42",
+      "match_time": "85:16",
+      "field": "script_angle",
+      "original_value": "德国队射门被库拉索门将扑出，比赛继续",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0050",
+      "video_timestamp": "01:39:42",
+      "match_time": "85:16",
+      "field": "evidence",
+      "original_value": "慢动作回放显示德国队球员射门，库拉索门将做出扑救动作，比分牌显示比赛时间85:16",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0050",
+      "video_timestamp": "01:39:42",
+      "match_time": "85:16",
+      "field": "title",
+      "original_value": "德国队射门被库拉索门将扑出",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0051",
+      "video_timestamp": "01:42:16",
+      "match_time": "88'",
+      "field": "script_angle",
+      "original_value": "德国队进球，比分变为7-1，哈弗茨（88'）破门",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0051",
+      "video_timestamp": "01:42:16",
+      "match_time": "88'",
+      "field": "evidence",
+      "original_value": "镜头切至德国球迷看台，球迷挥舞国旗欢呼。此时比分牌发生跳变，显示德国队进球，字幕显示哈弗茨（88'）进球",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0052",
+      "video_timestamp": "01:43:04",
+      "match_time": "88'",
+      "field": "script_angle",
+      "original_value": "德国队球员庆祝进球，哈弗茨（88'）破门",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0052",
+      "video_timestamp": "01:43:04",
+      "match_time": "88'",
+      "field": "evidence",
+      "original_value": "足球越过门线进入球网，球员庆祝动作明显，后续比分牌显示德国7-1，字幕显示哈弗茨（88'）进球",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0056",
+      "video_timestamp": "01:49:20",
+      "match_time": "90+4'",
+      "field": "script_angle",
+      "original_value": "德国队任意球射门被库拉索门将扑出，比赛继续",
+      "action": "replace_text"
+    },
+    {
+      "rule_id": "identity_contamination",
+      "severity": "patch",
+      "event_id": "F0056",
+      "video_timestamp": "01:49:20",
+      "match_time": "90+4'",
+      "field": "evidence",
+      "original_value": "高角度全景镜头，德国球员主罚任意球，皮球飞向球门，皮球被库拉索门将扑出，比赛继续",
+      "action": "replace_text"
+    }
+  ]
+}

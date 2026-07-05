@@ -74,6 +74,8 @@ class EventAgentOptions:
     text_max_tokens: int = 10000
     review_window_seconds: float = 8.0
     review_max_frames: int = 9
+    goal_review_window_seconds: float = 30.0
+    goal_review_max_frames: int = 31
     max_chunks: int | None = None
     max_reviews: int | None = None
     final_max_events: int = 30
@@ -170,6 +172,11 @@ class EventAgentRunner:
             segments = descriptions[start : start + self.options.chunk_segments]
             if not segments:
                 continue
+            fixed_goal_memory = _collect_fixed_goal_memory(segments)
+            fixed_goal_memory_text = _format_fixed_goal_memory(fixed_goal_memory)
+            segment_text = "\n\n".join(self._format_segment(segment) for segment in segments)
+            if fixed_goal_memory_text:
+                segment_text = fixed_goal_memory_text + "\n\n" + segment_text
             chunks.append(
                 {
                     "chunk_id": f"C{len(chunks) + 1:04d}",
@@ -178,7 +185,8 @@ class EventAgentRunner:
                     "start": segments[0].get("start"),
                     "end": segments[-1].get("end"),
                     "segments": segments,
-                    "text": "\n\n".join(self._format_segment(segment) for segment in segments),
+                    "fixed_goal_memory": fixed_goal_memory,
+                    "text": segment_text,
                 }
             )
         return chunks
@@ -189,6 +197,14 @@ class EventAgentRunner:
             f"SUMMARY: {segment.get('segment_summary') or ''}",
             "OBSERVATIONS:",
         ]
+        fixed_facts = segment.get("fixed_facts") or []
+        if fixed_facts:
+            lines.append("LOCAL_FIXED_FACTS:")
+            for fact in fixed_facts:
+                if isinstance(fact, dict):
+                    lines.append(f"- {fact.get('fixed_fact_text') or fact}")
+                else:
+                    lines.append(f"- {fact}")
         observations = segment.get("observations") or []
         for obs in observations:
             if isinstance(obs, str):
@@ -560,8 +576,13 @@ V4 新增前置规则：
 
     def _select_frames_for_review(self, event: dict[str, Any], frames: list[dict[str, Any]]) -> list[dict[str, Any]]:
         ts = timestamp_to_seconds(event.get("review_timestamp") or event.get("timestamp"))
-        start = max(0.0, ts - self.options.review_window_seconds)
-        end = ts + self.options.review_window_seconds
+        window_seconds = self.options.review_window_seconds
+        max_frames = self.options.review_max_frames
+        if self.options.schema_version == "v4" and event.get("event_type") == "goal":
+            window_seconds = max(window_seconds, self.options.goal_review_window_seconds)
+            max_frames = max(max_frames, self.options.goal_review_max_frames)
+        start = max(0.0, ts - window_seconds)
+        end = ts + window_seconds
         selected = [
             frame
             for frame in frames
@@ -572,8 +593,8 @@ V4 新增前置规则：
                 frames,
                 key=lambda frame: abs(float(frame.get("timestamp_seconds") or timestamp_to_seconds(frame.get("timestamp"))) - ts),
             )[: self.options.review_max_frames]
-        if len(selected) > self.options.review_max_frames:
-            selected = _downsample(selected, self.options.review_max_frames)
+        if len(selected) > max_frames:
+            selected = _downsample(selected, max_frames)
         return selected
 
     def _run_one_image_review(self, item: dict[str, Any], raw_path: Path, request_fingerprint: str) -> dict[str, Any]:
@@ -1154,6 +1175,34 @@ def _downsample(items: list[dict[str, Any]], max_items: int) -> list[dict[str, A
         return [items[0]]
     step = (len(items) - 1) / (max_items - 1)
     return [items[round(idx * step)] for idx in range(max_items)]
+
+
+def _collect_fixed_goal_memory(segments: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    by_index: dict[int, dict[str, Any]] = {}
+    for segment in segments:
+        for fact in segment.get("fixed_goal_memory") or []:
+            if not isinstance(fact, dict):
+                continue
+            try:
+                index = int(fact.get("goal_index") or 0)
+            except (TypeError, ValueError):
+                index = len(by_index) + 1
+            if index and index not in by_index:
+                by_index[index] = fact
+    return [by_index[key] for key in sorted(by_index)]
+
+
+def _format_fixed_goal_memory(memory: list[dict[str, Any]]) -> str:
+    if not memory:
+        return ""
+    lines = [
+        "FIXED_GOAL_MEMORY:",
+        "以下进球事实来自记分牌 OCR 比分跳变，是硬约束。后续 narrative 和事件定位不得改写、删除或新增与之冲突的新进球。",
+    ]
+    for fact in memory:
+        lines.append(f"- {fact.get('fixed_fact_text') or fact}")
+    lines.append("规则：只有这些 FIXED_GOAL_MEMORY 里的 8 个进球能作为 goal；回放、庆祝、进球信息条和比分未变画面不能生成新 goal。")
+    return "\n".join(lines)
 
 
 def _sanitize_v3_final(final_doc: dict[str, Any], max_events: int | None = None) -> dict[str, Any]:
