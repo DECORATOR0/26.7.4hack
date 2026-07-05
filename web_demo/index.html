@@ -23,7 +23,7 @@
     <nav class="page-rail" aria-label="页面目录">
       <a class="page-rail__link is-active" href="#reviewDemo" data-scroll-target="reviewDemo">// 事项回看</a>
       <a class="page-rail__link" href="#oneMinuteDemo" data-scroll-target="oneMinuteDemo">// 视频 Demo</a>
-      <a class="page-rail__link" href="#executionChain" data-scroll-target="executionChain">// 执行链路</a>
+      <a class="page-rail__link" href="#executionChain" data-scroll-target="executionChain">// 生成流程</a>
       <a class="page-rail__link" href="#mobileShare" data-scroll-target="mobileShare">// 手机扫码</a>
     </nav>
     <header class="hero" id="top">
@@ -51,44 +51,44 @@
             <p class="eyebrow">Workflow</p>
             <h2>生成流程</h2>
           </div>
-          <p>从整场视频到可点击网页，自动完成事项定位、片段生成和字幕文案。</p>
+          <p>从整场视频到可点击网页，自动完成转写、事项定位、复核、片段生成和字幕文案。</p>
         </div>
 
         <div class="harness-flow">
           <article class="harness-node">
             <span class="node-index">01</span>
-            <h3>比赛视频</h3>
-            <p>读取整场比赛视频和基础比赛信息。</p>
+            <h3>视频分批</h3>
+            <p>把整场比赛拆成稳定批次，保留视频时间和比赛信息。</p>
           </article>
           <article class="harness-node">
             <span class="node-index">02</span>
-            <h3>识别事项</h3>
-            <p>找出进球、射门机会、角球、任意球、判罚争议和换人。</p>
+            <h3>批量转写</h3>
+            <p>逐批读取画面和记分牌，把视觉内容转成文字观察。</p>
           </article>
           <article class="harness-node">
             <span class="node-index">03</span>
-            <h3>校准时间</h3>
-            <p>把比赛时间和视频时间对齐，进球时间以记分牌跳变为准。</p>
+            <h3>窗口识别</h3>
+            <p>按时间窗口识别进球、射门机会、定位球、争议和换人。</p>
           </article>
           <article class="harness-node">
             <span class="node-index">04</span>
-            <h3>生成片段</h3>
-            <p>为每个事项生成可直接播放的回看片段。</p>
+            <h3>选择复核</h3>
+            <p>只对高风险节点补充视觉复核，进球按记分牌变化校准。</p>
           </article>
           <article class="harness-node">
             <span class="node-index">05</span>
-            <h3>生成字幕</h3>
-            <p>生成中英西法字幕，并支持激情和平淡两种语气。</p>
+            <h3>生成脚本</h3>
+            <p>把保留事项写成中英西法字幕，支持激情和稳健两种语气。</p>
           </article>
           <article class="harness-node">
             <span class="node-index">06</span>
-            <h3>生成网页</h3>
-            <p>把事项、片段和字幕整理成可点击回看的网页。</p>
+            <h3>生成片段</h3>
+            <p>按校准后的时间中心切出 10 秒回看片段和演示视频。</p>
           </article>
           <article class="harness-node harness-node--output">
             <span class="node-index">07</span>
-            <h3>最终输出</h3>
-            <p>43 个事项、43 个回看片段、8 个进球和一分钟演示视频。</p>
+            <h3>生成网页</h3>
+            <p>输出 43 个事项、43 个回看片段、字幕和一分钟演示视频。</p>
           </article>
         </div>
       </section>
@@ -129,8 +129,8 @@
       <section class="mobile-share" id="mobileShare" aria-label="mobile demo qr code">
         <div>
           <p class="eyebrow">Mobile Scan</p>
-          <h2>手机扫码交互</h2>
-          <p>扫码后可直接在手机浏览器里选择大标签、小标签，并播放对应片段。</p>
+          <h2>手机扫码</h2>
+          <p>扫码后可直接在手机浏览器里选择事项，并播放对应片段。</p>
           <a id="publicLink" href="http://39.105.210.249/">http://39.105.210.249/</a>
         </div>
         <img class="qr-code" src="assets/site-qr.png" alt="Web demo QR code" />
