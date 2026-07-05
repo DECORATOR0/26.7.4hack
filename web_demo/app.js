@@ -32,6 +32,18 @@ if (publicLink) {
   publicLink.textContent = PUBLIC_URL;
 }
 
+function syncDeviceClass() {
+  const isMobile =
+    window.matchMedia("(max-width: 960px)").matches ||
+    window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+  document.documentElement.dataset.device = isMobile ? "mobile" : "desktop";
+  document.body.classList.toggle("is-mobile-device", isMobile);
+  document.body.classList.toggle("is-desktop-device", !isMobile);
+}
+
+syncDeviceClass();
+window.addEventListener("resize", syncDeviceClass);
+
 function easeInOutCubic(value) {
   return value < 0.5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
 }
