@@ -23,15 +23,17 @@ REPORT_CANDIDATES = [
 ]
 REPORT_PATH = next((path for path in REPORT_CANDIDATES if path.exists()), REPORT_CANDIDATES[0])
 EVENTS_CANDIDATES = [
-    ROOT / "outputs_event_agent_v4_3_2" / "final_events_guarded_v4_3_2.json",
+    ROOT / "outputs_event_agent_v4_4_text" / "final_events_guarded_v4.json",
     ROOT / "outputs_event_agent_v4_4" / "final_events_guarded_v4_4.json",
+    ROOT / "outputs_event_agent_v4_3_2" / "final_events_guarded_v4_3_2.json",
     ROOT / "outputs_event_agent_v4_3" / "final_events_guarded_v4_3.json",
     ROOT / "outputs_event_agent_v4_2" / "final_events_guarded_v4.json",
 ]
 EVENTS_PATH = next((path for path in EVENTS_CANDIDATES if path.exists()), EVENTS_CANDIDATES[0])
 SCOREBOARD_GOAL_CANDIDATES = [
-    ROOT / "outputs_event_agent_v4_3_2" / "scoreboard_goal_events.json",
+    ROOT / "outputs_event_agent_v4_4_seed" / "scoreboard_goal_events.json",
     ROOT / "outputs_event_agent_v4_4" / "scoreboard_goal_events.json",
+    ROOT / "outputs_event_agent_v4_3_2" / "scoreboard_goal_events.json",
     ROOT / "outputs_event_agent_v4_3" / "scoreboard_goal_events.json",
 ]
 SCOREBOARD_GOALS_PATH = next((path for path in SCOREBOARD_GOAL_CANDIDATES if path.exists()), SCOREBOARD_GOAL_CANDIDATES[0])
