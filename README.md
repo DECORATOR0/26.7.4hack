@@ -94,3 +94,9 @@ outputs/
 - `faster-whisper` 或 `openai-whisper`：从音频转写原始解说。
 - `tesseract` + `pytesseract`：识别比分牌和比赛时间。
 - `LangGraph`：后续可把 5 个阶段包装成状态图节点。
+
+## 开发原则补充
+
+- 不要在端到端跑完后，为了强行得到期望结果而手动补丁式修改 final report 或 final event JSON。
+- 如果 OCR 进球事实、事项抽取或报告文案有误，应回到上游证据、提示词、模型阶段或校验流程修正后重新跑。
+- V4 系列最终报告必须能追溯到实际端到端脚本输出；人工审查结论要单独记录，不要混进生成产物。
